@@ -6,6 +6,7 @@ import { BudgetController } from '../controllers/budget.controller.js';
 import { ShareController } from '../controllers/share.controller.js';
 import { TripMemberController } from '../controllers/tripMember.controller.js';
 import { CollaborationController } from '../controllers/collaboration.controller.js';
+import { AIController } from '../controllers/ai.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { validateBody, validateQuery, validateParams } from '../middleware/validate.middleware.js';
 import { createTripSchema, updateTripSchema } from '../validators/trip.validator.js';
@@ -37,6 +38,7 @@ import {
   tripActivityParamSchema,
   tripParamSchema,
 } from '../validators/collaboration.validator.js';
+import { saveAiItinerarySchema } from '../validators/ai.validator.js';
 
 const router = Router();
 
@@ -82,5 +84,8 @@ router.delete('/:tripId/activities/:activityId/vote', validateParams(tripActivit
 router.post('/:tripId/comments', validateParams(tripParamSchema), validateBody(createCommentSchema), CollaborationController.createComment);
 router.get('/:tripId/comments', validateParams(tripParamSchema), validateQuery(getCommentsQuerySchema), CollaborationController.getComments);
 router.post('/:tripId/activities/:activityId/suggest', validateParams(tripActivityParamSchema), validateBody(suggestActivitySchema), CollaborationController.suggestActivity);
+
+// AI Itinerary Persistence route
+router.post('/:tripId/itinerary/from-ai', validateParams(tripParamSchema), validateBody(saveAiItinerarySchema), AIController.saveAiItineraryToTrip);
 
 export default router;
