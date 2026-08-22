@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/Input";
@@ -9,8 +9,14 @@ import { ApiError } from "@/lib/api/client";
 import { Globe } from "lucide-react";
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { register, user, isLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, isLoading, router]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

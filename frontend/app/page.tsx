@@ -50,12 +50,20 @@ import {
 } from "@/components/calendar/Calendar";
 import { Home, Compass, Map, User } from "lucide-react";
 
+type ToastVariant = "info" | "success" | "warning" | "error";
+interface ToastItem {
+  id: string;
+  variant: ToastVariant;
+  title: string;
+  description: string;
+}
+
 export default function DesignSystemShowcase() {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
-  const [toasts, setToasts] = React.useState<any[]>([]);
+  const [toasts, setToasts] = React.useState<ToastItem[]>([]);
 
-  const addToast = (variant: any) => {
+  const addToast = (variant: ToastVariant) => {
     setToasts((prev) => [
       ...prev,
       {

@@ -52,6 +52,7 @@ export interface Trip {
   tripCities?: TripCity[];
   tripMembers?: TripMember[];
   _count?: {
+    tripCities?: number;
     itineraryItems?: number;
     expenses?: number;
   };
@@ -80,31 +81,35 @@ export interface UpdateTripInput {
 // ─────────────────────────────────────────────
 
 /** GET /api/trips — List all trips for the authenticated user */
-export function getTrips(): Promise<Trip[]> {
-  return apiGet<Trip[]>("/trips");
+export async function getTrips(): Promise<Trip[]> {
+  const data = await apiGet<{ trips: Trip[] }>("/trips");
+  return data.trips;
 }
 
 /** GET /api/trips/:tripId */
-export function getTrip(tripId: string): Promise<Trip> {
-  return apiGet<Trip>(`/trips/${tripId}`);
+export async function getTrip(tripId: string): Promise<Trip> {
+  const data = await apiGet<{ trip: Trip }>(`/trips/${tripId}`);
+  return data.trip;
 }
 
 /** POST /api/trips — Create a new trip */
-export function createTrip(data: CreateTripInput): Promise<Trip> {
-  return apiPost<Trip>("/trips", data);
+export async function createTrip(data: CreateTripInput): Promise<Trip> {
+  const dataRes = await apiPost<{ trip: Trip }>("/trips", data);
+  return dataRes.trip;
 }
 
 /** PUT /api/trips/:tripId — Update trip metadata */
-export function updateTrip(
+export async function updateTrip(
   tripId: string,
   data: UpdateTripInput
 ): Promise<Trip> {
-  return apiPut<Trip>(`/trips/${tripId}`, data);
+  const dataRes = await apiPut<{ trip: Trip }>(`/trips/${tripId}`, data);
+  return dataRes.trip;
 }
 
 /** DELETE /api/trips/:tripId — Delete a trip (OWNER only) */
-export function deleteTrip(tripId: string): Promise<void> {
-  return apiDelete<void>(`/trips/${tripId}`);
+export async function deleteTrip(tripId: string): Promise<void> {
+  await apiDelete<{ id: string }>(`/trips/${tripId}`);
 }
 
 // ─────────────────────────────────────────────
@@ -112,30 +117,34 @@ export function deleteTrip(tripId: string): Promise<void> {
 // ─────────────────────────────────────────────
 
 /** GET /api/trips/:tripId/cities — Get ordered city route */
-export function getTripCities(tripId: string): Promise<TripCity[]> {
-  return apiGet<TripCity[]>(`/trips/${tripId}/cities`);
+export async function getTripCities(tripId: string): Promise<TripCity[]> {
+  const data = await apiGet<{ tripCities: TripCity[] }>(`/trips/${tripId}/cities`);
+  return data.tripCities;
 }
 
 /** POST /api/trips/:tripId/cities — Add a city stop */
-export function addCityToTrip(
+export async function addCityToTrip(
   tripId: string,
   data: { cityId: string; arrivalDate?: string; departureDate?: string }
 ): Promise<TripCity> {
-  return apiPost<TripCity>(`/trips/${tripId}/cities`, data);
+  const dataRes = await apiPost<{ tripCity: TripCity }>(`/trips/${tripId}/cities`, data);
+  return dataRes.tripCity;
 }
 
 /** DELETE /api/trips/:tripId/cities/:cityId — Remove a city stop */
-export function removeCityFromTrip(
+export async function removeCityFromTrip(
   tripId: string,
   cityId: string
 ): Promise<void> {
-  return apiDelete<void>(`/trips/${tripId}/cities/${cityId}`);
+  await apiDelete<{ tripId: string; cityId: string }>(`/trips/${tripId}/cities/${cityId}`);
 }
 
 /** PUT /api/trips/:tripId/cities/reorder — Reorder city stops */
-export function reorderTripCities(
+export async function reorderTripCities(
   tripId: string,
   cityIds: string[]
 ): Promise<TripCity[]> {
-  return apiPut<TripCity[]>(`/trips/${tripId}/cities/reorder`, { cityIds });
+  const dataRes = await apiPut<{ tripCities: TripCity[] }>(`/trips/${tripId}/cities/reorder`, { cityIds });
+  return dataRes.tripCities;
 }
+
