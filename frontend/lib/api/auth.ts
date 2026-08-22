@@ -55,3 +55,9 @@ export async function logoutUser(): Promise<void> {
 export async function getMe(): Promise<{ user: User }> {
   return apiGet<{ user: User }>("/auth/me");
 }
+
+/** GET /api/users/me — Get user profile */
+export async function getUserProfile(): Promise<{ user: User }> {
+  return apiGet<{ user: User }>("/users/me");
+}
+

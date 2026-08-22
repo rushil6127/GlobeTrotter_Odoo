@@ -74,7 +74,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!cancelled) setUser(data.user);
       } catch (err) {
         // 401 = no active session, that's fine — stay unauthenticated
-        if (err instanceof ApiError && err.status !== 401) {
+        if (err instanceof ApiError && err.status === 401) {
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("token");
+          }
+        } else if (err instanceof ApiError && err.status !== 401) {
           console.error("[AuthContext] Unexpected error restoring session:", err);
         }
       } finally {
@@ -86,6 +90,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleAuthSuccess = useCallback((data: AuthData) => {
+    if (typeof window !== "undefined" && data.token) {
+      localStorage.setItem("token", data.token);
+      document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+    }
     setUser(data.user);
   }, []);
 
@@ -111,6 +119,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Best-effort — clear local state regardless
     } finally {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      }
       setUser(null);
       router.push("/login");
     }

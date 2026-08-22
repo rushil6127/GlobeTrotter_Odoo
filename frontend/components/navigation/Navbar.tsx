@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   Globe,
@@ -11,10 +12,10 @@ import {
   User,
   Bell,
   Search,
-  Menu,
-  X,
+  LogOut,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
+import { useAuth } from "@/context/AuthContext";
 
 /* ───────── Types ───────── */
 
@@ -48,7 +49,7 @@ const navItems: NavItem[] = [
 
 export function Logo({ collapsed }: { collapsed?: boolean }) {
   return (
-    <a href="/" className="flex items-center gap-2.5 group">
+    <Link href="/" className="flex items-center gap-2.5 group">
       <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
         <Globe className="h-5 w-5 text-white" />
       </div>
@@ -57,7 +58,7 @@ export function Logo({ collapsed }: { collapsed?: boolean }) {
           Globe<span className="text-primary">Trotter</span>
         </span>
       )}
-    </a>
+    </Link>
   );
 }
 
@@ -71,6 +72,8 @@ export function Navbar({
   onSearch,
   className,
 }: NavbarProps) {
+  const { logout } = useAuth();
+
   return (
     <header
       className={cn(
@@ -143,6 +146,15 @@ export function Navbar({
               {userName}
             </span>
           </a>
+
+          <button
+            onClick={() => { void logout(); }}
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors ml-1"
+            title="Log Out"
+            aria-label="Log Out"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </div>
     </header>

@@ -9,10 +9,12 @@ import {
   CalendarDays,
   User,
   Settings,
+  LogOut,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { Logo } from "./Navbar";
+import { useAuth } from "@/context/AuthContext";
 
 /* ───────── Types ───────── */
 
@@ -51,6 +53,8 @@ export function Sidebar({
   onToggle,
   className,
 }: SidebarProps) {
+  const { logout } = useAuth();
+
   return (
     <aside
       className={cn(
@@ -113,6 +117,20 @@ export function Sidebar({
             </a>
           );
         })}
+
+        <button
+          onClick={() => { void logout(); }}
+          title={collapsed ? "Log Out" : undefined}
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-neutral-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200",
+            collapsed && "justify-center px-2"
+          )}
+        >
+          <span className="shrink-0">
+            <LogOut className="h-5 w-5" />
+          </span>
+          {!collapsed && "Log Out"}
+        </button>
       </div>
 
       {/* Toggle button */}

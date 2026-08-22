@@ -1,12 +1,12 @@
 /**
- * GlobeTrotter — Route Protection Middleware
+ * GlobeTrotter — Route Protection Middleware / Proxy
  *
  * Runs on the Edge before every request to guarded routes.
  * If the `token` HttpOnly cookie is absent → redirect to /login.
  * If an authenticated user hits /login or /register → redirect to /dashboard.
  *
- * NOTE: This only checks cookie presence. Real token validation happens
- * on the backend via GET /api/auth/me; AuthContext handles that.
+ * NOTE: Real token validation also happens on the backend via GET /api/auth/me;
+ * AuthContext handles that for client-side state.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -23,17 +23,17 @@ const PROTECTED_PATHS = [
 /** Routes that authenticated users should not access */
 const AUTH_ONLY_PATHS = ["/login", "/register"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
 
   // 1. Authenticated users visiting login/register → send to dashboard
-  if (AUTH_ONLY_PATHS.some((p) => pathname.startsWith(p)) && token) {
+  if (AUTH_ONLY_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`)) && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // 2. Unauthenticated users visiting protected routes → send to login
-  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
+  const isProtected = PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (isProtected && !token) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirectTo", pathname);

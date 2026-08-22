@@ -34,21 +34,26 @@ export function useApiData<T>(
 
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
 
-    fetcher()
-      .then((result) => {
-        if (!cancelled) setData(result);
-      })
-      .catch((err: unknown) => {
+    async function loadData() {
+      try {
+        const result = await fetcher();
+        if (!cancelled) {
+          setData(result);
+          setError(null);
+        }
+      } catch (err: unknown) {
         if (!cancelled) {
           setError(err instanceof Error ? err : new Error(String(err)));
         }
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadData();
 
     return () => {
       cancelled = true;
