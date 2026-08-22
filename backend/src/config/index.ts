@@ -8,4 +8,6 @@ export const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
   databaseUrl: process.env.DATABASE_URL || '',
+  aiApiKey: process.env.AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || '',
+  aiModel: process.env.AI_MODEL || 'gpt-4o-mini',
 };
