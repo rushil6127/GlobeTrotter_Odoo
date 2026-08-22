@@ -5,6 +5,7 @@ import { ItineraryController } from '../controllers/itinerary.controller.js';
 import { BudgetController } from '../controllers/budget.controller.js';
 import { ShareController } from '../controllers/share.controller.js';
 import { TripMemberController } from '../controllers/tripMember.controller.js';
+import { CollaborationController } from '../controllers/collaboration.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { validateBody, validateQuery, validateParams } from '../middleware/validate.middleware.js';
 import { createTripSchema, updateTripSchema } from '../validators/trip.validator.js';
@@ -28,6 +29,14 @@ import {
   tripMemberParamSchema,
   memberIdParamSchema,
 } from '../validators/tripMember.validator.js';
+import {
+  voteActivitySchema,
+  createCommentSchema,
+  getCommentsQuerySchema,
+  suggestActivitySchema,
+  tripActivityParamSchema,
+  tripParamSchema,
+} from '../validators/collaboration.validator.js';
 
 const router = Router();
 
@@ -66,5 +75,12 @@ router.get('/:tripId/members', validateParams(tripMemberParamSchema), TripMember
 router.post('/:tripId/members', validateParams(tripMemberParamSchema), validateBody(inviteMemberSchema), TripMemberController.addTripMember);
 router.put('/:tripId/members/:memberId', validateParams(memberIdParamSchema), validateBody(updateMemberRoleSchema), TripMemberController.updateTripMemberRole);
 router.delete('/:tripId/members/:memberId', validateParams(memberIdParamSchema), TripMemberController.removeTripMember);
+
+// Activity Voting, Comments & Suggestions routes
+router.post('/:tripId/activities/:activityId/vote', validateParams(tripActivityParamSchema), validateBody(voteActivitySchema), CollaborationController.voteActivity);
+router.delete('/:tripId/activities/:activityId/vote', validateParams(tripActivityParamSchema), CollaborationController.removeVote);
+router.post('/:tripId/comments', validateParams(tripParamSchema), validateBody(createCommentSchema), CollaborationController.createComment);
+router.get('/:tripId/comments', validateParams(tripParamSchema), validateQuery(getCommentsQuerySchema), CollaborationController.getComments);
+router.post('/:tripId/activities/:activityId/suggest', validateParams(tripActivityParamSchema), validateBody(suggestActivitySchema), CollaborationController.suggestActivity);
 
 export default router;
