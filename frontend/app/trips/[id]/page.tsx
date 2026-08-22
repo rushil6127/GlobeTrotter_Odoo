@@ -528,10 +528,15 @@ export default function TripDetailPage() {
               </Link>
               <Link
                 href={`/trips/${trip.id}/budget`}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100 bg-white border border-neutral-200/80 shadow-sm shrink-0 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-400 bg-white border border-neutral-200/60 shadow-sm shrink-0 flex items-center gap-1.5 opacity-60 pointer-events-none"
+                tabIndex={-1}
+                aria-disabled="true"
               >
-                <Wallet className="h-4 w-4 text-secondary-600" />
-                Budget & Expenses
+                <Wallet className="h-4 w-4 text-neutral-400" />
+                Budget
+                <span className="text-[9px] font-bold uppercase tracking-wide bg-neutral-100 text-neutral-400 px-1.5 py-0.5 rounded-md ml-0.5">
+                  Soon
+                </span>
               </Link>
             </div>
 
@@ -600,25 +605,30 @@ export default function TripDetailPage() {
                   </Button>
                 </div>
 
-                {/* Budget CTA Card */}
-                <div className="bg-gradient-to-br from-secondary-50 to-white rounded-3xl border border-secondary/20 p-6 shadow-sm space-y-4">
-                  <div className="h-10 w-10 rounded-2xl bg-secondary-600 text-white flex items-center justify-center shadow-md shadow-secondary/25">
+                {/* Budget CTA Card — Coming Soon */}
+                <div className="bg-neutral-50/80 rounded-3xl border border-neutral-200/60 p-6 shadow-sm space-y-4 opacity-60">
+                  <div className="h-10 w-10 rounded-2xl bg-neutral-200 text-neutral-400 flex items-center justify-center">
                     <Wallet className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-neutral-900 text-base">Budget & Optimizer</h3>
-                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
-                      Track expenses across categories and discover smart cost-saving alternatives.
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-neutral-500 text-base">Budget & Expenses</h3>
+                      <span className="text-[9px] font-bold uppercase tracking-wide bg-neutral-200 text-neutral-400 px-1.5 py-0.5 rounded-md">
+                        Soon
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
+                      Track trip spending and optimize your budget. Coming in a future release.
                     </p>
                   </div>
                   <Button
                     variant="outline"
                     size="md"
                     fullWidth
-                    rightIcon={<ArrowRight className="h-4 w-4" />}
-                    onClick={() => router.push(`/trips/${trip.id}/budget`)}
+                    disabled
+                    className="cursor-not-allowed opacity-50"
                   >
-                    Manage Budget
+                    Coming Soon
                   </Button>
                 </div>
               </div>
