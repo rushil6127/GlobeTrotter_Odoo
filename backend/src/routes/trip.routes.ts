@@ -4,6 +4,7 @@ import { TripCityController } from '../controllers/tripCity.controller.js';
 import { ItineraryController } from '../controllers/itinerary.controller.js';
 import { BudgetController } from '../controllers/budget.controller.js';
 import { ShareController } from '../controllers/share.controller.js';
+import { TripMemberController } from '../controllers/tripMember.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { validateBody, validateQuery, validateParams } from '../middleware/validate.middleware.js';
 import { createTripSchema, updateTripSchema } from '../validators/trip.validator.js';
@@ -21,6 +22,12 @@ import {
   createShareLinkSchema,
   tripShareParamSchema,
 } from '../validators/share.validator.js';
+import {
+  inviteMemberSchema,
+  updateMemberRoleSchema,
+  tripMemberParamSchema,
+  memberIdParamSchema,
+} from '../validators/tripMember.validator.js';
 
 const router = Router();
 
@@ -53,5 +60,11 @@ router.post('/:tripId/expenses', validateParams(tripBudgetParamSchema), validate
 router.get('/:tripId/share', validateParams(tripShareParamSchema), ShareController.getTripShareStatus);
 router.post('/:tripId/share', validateParams(tripShareParamSchema), validateBody(createShareLinkSchema), ShareController.createShareLink);
 router.delete('/:tripId/share', validateParams(tripShareParamSchema), ShareController.revokeShareLink);
+
+// Trip Member / Collaboration routes
+router.get('/:tripId/members', validateParams(tripMemberParamSchema), TripMemberController.getTripMembers);
+router.post('/:tripId/members', validateParams(tripMemberParamSchema), validateBody(inviteMemberSchema), TripMemberController.addTripMember);
+router.put('/:tripId/members/:memberId', validateParams(memberIdParamSchema), validateBody(updateMemberRoleSchema), TripMemberController.updateTripMemberRole);
+router.delete('/:tripId/members/:memberId', validateParams(memberIdParamSchema), TripMemberController.removeTripMember);
 
 export default router;
