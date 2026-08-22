@@ -2,7 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Check } from "lucide-react";
 
 /* ───────── Types ───────── */
 
@@ -32,70 +32,84 @@ export function CityCard({
   return (
     <div
       className={cn(
-        "group bg-white rounded-2xl border border-neutral-100 overflow-hidden",
-        "shadow-sm hover:shadow-lg transition-all duration-300",
+        "group bg-white rounded-3xl border border-neutral-200/60 overflow-hidden",
+        "shadow-sm hover:shadow-xl transition-all duration-300",
+        "hover:-translate-y-1 flex flex-col justify-between",
         className
       )}
     >
-      {/* Image */}
-      <div className="relative h-40 overflow-hidden">
+      {/* Image Banner */}
+      <div className="relative h-44 overflow-hidden shrink-0">
         {image ? (
           <img
             src={image}
             alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-secondary/20 to-primary/10 flex items-center justify-center">
-            <MapPin className="h-8 w-8 text-secondary/40" />
+          <div className="w-full h-full bg-gradient-to-br from-secondary/20 via-neutral-100 to-primary/15 flex items-center justify-center">
+            <MapPin className="h-8 w-8 text-secondary/50" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/60 via-transparent to-transparent" />
+
+        {/* City & Country badge on image */}
+        <div className="absolute bottom-3.5 left-3.5 right-3.5">
+          <h3 className="font-display font-bold text-white text-lg drop-shadow-sm leading-tight">
+            {name}
+          </h3>
+          <p className="text-xs text-white/90 font-medium flex items-center gap-1 mt-0.5">
+            <MapPin className="h-3 w-3 text-primary-300" />
+            {country}
+          </p>
+        </div>
 
         {/* Add button */}
         {onAdd && (
           <button
             onClick={onAdd}
             className={cn(
-              "absolute top-3 right-3 h-8 w-8 rounded-full flex items-center justify-center",
-              "transition-all duration-200 shadow-sm",
+              "absolute top-3.5 right-3.5 h-8 w-8 rounded-xl flex items-center justify-center",
+              "transition-all duration-300 shadow-md backdrop-blur-md",
               added
-                ? "bg-primary text-white"
-                : "bg-white/90 backdrop-blur-sm text-neutral-600 hover:bg-primary hover:text-white"
+                ? "bg-primary text-white scale-105"
+                : "bg-white/90 text-neutral-700 hover:bg-primary hover:text-white"
             )}
+            title={added ? "Added to trip" : "Add to trip"}
           >
-            <Plus className={cn("h-4 w-4", added && "rotate-45")} />
+            {added ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
           </button>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-2">
-        <div>
-          <h3 className="font-semibold text-neutral-900">{name}</h3>
-          <p className="text-sm text-neutral-500 flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" />
-            {country}
-          </p>
-        </div>
+      <div className="p-4 sm:p-5 space-y-3 flex-1 flex flex-col justify-between">
         {description && (
-          <p className="text-sm text-neutral-500 line-clamp-2">{description}</p>
+          <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
+            {description}
+          </p>
         )}
-        {priceLevel && (
-          <div className="flex items-center gap-0.5">
-            {[1, 2, 3].map((level) => (
-              <span
-                key={level}
-                className={cn(
-                  "text-sm font-bold",
-                  level <= priceLevel ? "text-accent" : "text-neutral-200"
-                )}
-              >
-                $
-              </span>
-            ))}
-          </div>
-        )}
+
+        <div className="flex items-center justify-between pt-1 border-t border-neutral-100 text-xs">
+          <span className="text-neutral-400 font-medium">Price level</span>
+          {priceLevel ? (
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3].map((level) => (
+                <span
+                  key={level}
+                  className={cn(
+                    "text-xs font-bold",
+                    level <= priceLevel ? "text-accent font-extrabold" : "text-neutral-200"
+                  )}
+                >
+                  $
+                </span>
+              ))}
+            </div>
+          ) : (
+            <span className="text-neutral-400 text-xs">Moderate</span>
+          )}
+        </div>
       </div>
     </div>
   );
