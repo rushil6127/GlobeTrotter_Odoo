@@ -13,6 +13,17 @@ enum Role {
   VIEWER
 }
 
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
+
+enum SuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -22,8 +33,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  trips       Trip[]
-  tripMembers TripMember[]
+  trips               Trip[]
+  tripMembers         TripMember[]
+  activityVotes       ActivityVote[]
+  tripComments        TripComment[]
+  activitySuggestions ActivitySuggestion[]
 }
 
 model Trip {
@@ -38,12 +52,15 @@ model Trip {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tripCities     TripCity[]
-  itineraryItems ItineraryItem[]
-  expenses       Expense[]
-  tripMembers    TripMember[]
-  shareLinks     ShareLink[]
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tripCities          TripCity[]
+  itineraryItems      ItineraryItem[]
+  expenses            Expense[]
+  tripMembers         TripMember[]
+  shareLinks          ShareLink[]
+  activityVotes       ActivityVote[]
+  tripComments        TripComment[]
+  activitySuggestions ActivitySuggestion[]
 
   @@index([userId])
 }
@@ -96,8 +113,10 @@ model Activity {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  city           City            @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  itineraryItems ItineraryItem[]
+  city                City                 @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  itineraryItems      ItineraryItem[]
+  activityVotes       ActivityVote[]
+  activitySuggestions ActivitySuggestion[]
 
   @@index([cityId])
   @@index([category])
@@ -120,8 +139,9 @@ model ItineraryItem {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  trip     Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  activity Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  trip         Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activity     Activity?     @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  tripComments TripComment[]
 
   @@index([tripId])
   @@index([tripId, date])
@@ -174,4 +194,62 @@ model ShareLink {
 
   @@index([tripId])
   @@index([shareKey])
+}
+
+model ActivityVote {
+  id         String   @id @default(uuid())
+  tripId     String
+  activityId String
+  userId     String
+  voteType   VoteType @default(UPVOTE)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, activityId, userId])
+  @@index([tripId])
+  @@index([activityId])
+  @@index([userId])
+}
+
+model TripComment {
+  id              String   @id @default(uuid())
+  tripId          String
+  userId          String
+  itineraryItemId String?
+  text            String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  trip          Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itineraryItem ItineraryItem? @relation(fields: [itineraryItemId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@index([itineraryItemId])
+  @@index([userId])
+}
+
+model ActivitySuggestion {
+  id         String           @id @default(uuid())
+  tripId     String
+  activityId String
+  userId     String
+  dayNumber  Int?
+  date       DateTime?
+  notes      String?
+  status     SuggestionStatus @default(PENDING)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@index([activityId])
+  @@index([userId])
 }
