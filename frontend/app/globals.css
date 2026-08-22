@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme {
+  /* ================================
+       PRIMARY — Pastel Teal
+       ================================ */
+
+  --color-primary-50: #f0fbfa;
+  --color-primary-100: #dff5f3;
+  --color-primary-200: #c5ebe8;
+  --color-primary-300: #a5deda;
+  --color-primary-400: #82cec9;
+  --color-primary-500: #68bbb6;
+  --color-primary-600: #55a8a3;
+  --color-primary-700: #478f8b;
+  --color-primary-800: #3d7471;
+  --color-primary-900: #365f5d;
+
+
+  /* ================================
+       SECONDARY — Warm Sand
+       ================================ */
+  --color-secondary-50: #faf8f5;
+  --color-secondary-100: #f3eee8;
+  --color-secondary-200: #e8dfd4;
+  --color-secondary-300: #d9cbbb;
+  --color-secondary-400: #c9b6a0;
+  --color-secondary-500: #b59d84;
+  --color-secondary-600: #9d856d;
+  --color-secondary-700: #806b57;
+  --color-secondary-800: #685647;
+  --color-secondary-900: #504238;
+
+
+  /* ================================
+       ACCENT — Pastel Peach
+       ================================ */
+
+  --color-accent-50: #fff8f4;
+  --color-accent-100: #ffede4;
+  --color-accent-200: #ffddd0;
+  --color-accent-300: #ffc8b5;
+  --color-accent-400: #f8ad96;
+  --color-accent-500: #ee987f;
+  --color-accent-600: #dc8068;
+  --color-accent-700: #bd6854;
+  --color-accent-800: #9d5748;
+  --color-accent-900: #814a3e;
+
+
+  /* ================================
+       SEMANTICS
+       ================================ */
+
+  --color-success: #7bbfa5;
+  --color-warning: #e9b86d;
+  --color-error: #df8b8b;
+  --color-info: #82b9d1;
+
+
+  /* ================================
+       NEUTRALS — Warm White / Gray
+       ================================ */
+
+  --color-neutral-50: #fcfaf7;
+  --color-neutral-100: #f7f3ee;
+  --color-neutral-200: #eee8e0;
+  --color-neutral-300: #e2d9cf;
+  --color-neutral-400: #c9beb3;
+  --color-neutral-500: #a99d92;
+  --color-neutral-600: #897d73;
+  --color-neutral-700: #6d625a;
+  --color-neutral-800: #504840;
+  --color-neutral-900: #38322e;
+  --color-neutral-950: #25211f;
+
+  --font-sans: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair-display), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+/* Base resets & utilities */
+@layer base {
+  html {
+    @apply antialiased text-neutral-900 bg-neutral-50;
+    scroll-behavior: smooth;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  .font-display {
+    @apply font-serif font-medium;
+  }
+}
