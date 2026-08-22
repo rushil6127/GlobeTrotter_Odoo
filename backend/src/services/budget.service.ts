@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { CreateExpenseInput, UpdateExpenseInput, EXPENSE_CATEGORIES } from '../validators/budget.validator.js';
+import { SEED_CITIES } from '../config/seedData.js';
 
 export class BudgetService {
   /**
@@ -278,6 +279,225 @@ export class BudgetService {
       tripId: expense.tripId,
       amount: expense.amount,
       category: expense.category,
+    };
+  }
+
+  /**
+   * GET /api/trips/:tripId/budget/optimize
+   * Smart Budget Optimizer: analyzes trip expenses and itinerary items to suggest cheaper activity alternatives
+   * and complimentary free activities to re-balance over-budget trips.
+   */
+  static async optimizeTripBudget(tripId: string, userId: string) {
+    const budgetOverview = await this.getTripBudget(tripId, userId);
+    const { budget, spent, currency, overBudget, overBudgetAmount } = budgetOverview;
+
+    // Fetch all itinerary items and their linked activities
+    const itineraryItems = await prisma.itineraryItem.findMany({
+      where: { tripId },
+      include: {
+        activity: {
+          include: { city: true },
+        },
+      },
+      orderBy: [{ dayNumber: 'asc' }, { order: 'asc' }],
+    });
+
+    // Fetch trip cities to know which destinations are part of this trip
+    const tripCities = await prisma.tripCity.findMany({
+      where: { tripId },
+      include: { city: true },
+      orderBy: { order: 'asc' },
+    });
+
+    const cityIds = tripCities.map((tc) => tc.cityId);
+    const scheduledActivityIds = itineraryItems
+      .map((item) => item.activityId)
+      .filter((id): id is string => Boolean(id));
+
+    const suggestions: Array<{
+      itineraryItemId: string;
+      dayNumber: number;
+      currentActivity: string;
+      currentCost: number;
+      category: string;
+      city: {
+        id: string;
+        name: string;
+        country: string;
+      };
+      alternative: {
+        activityId: string;
+        name: string;
+        description: string | null;
+        category: string;
+        duration: number;
+        cost: number;
+        image: string | null;
+      };
+      potentialSavings: number;
+    }> = [];
+
+    // For each itinerary item that has a cost, check for cheaper alternatives in the same city and category
+    for (const item of itineraryItems) {
+      const currentCost = item.estimatedCost || item.activity?.estimatedCost || 0;
+      if (currentCost <= 0) continue;
+
+      const targetCityId = item.activity?.cityId || (cityIds.length > 0 ? cityIds[0] : null);
+      const targetCategory = item.activity?.category || 'Sightseeing';
+
+      if (!targetCityId) continue;
+
+      let cheaperActivities: Array<any> = [];
+
+      if (process.env.DATABASE_URL) {
+        try {
+          cheaperActivities = await prisma.activity.findMany({
+            where: {
+              cityId: targetCityId,
+              category: { equals: targetCategory, mode: 'insensitive' },
+              estimatedCost: { lt: currentCost },
+              id: { notIn: scheduledActivityIds },
+            },
+            orderBy: { estimatedCost: 'asc' },
+            take: 2,
+            include: { city: true },
+          });
+        } catch {
+          // DB error fallback
+        }
+      }
+
+      // Fallback from SEED_CITIES if needed
+      if (cheaperActivities.length === 0) {
+        const seedCity = SEED_CITIES.find((c) => c.id === targetCityId || c.name === item.activity?.city?.name);
+        if (seedCity) {
+          cheaperActivities = seedCity.activities
+            .filter(
+              (a) =>
+                a.category.toLowerCase() === targetCategory.toLowerCase() &&
+                a.estimatedCost < currentCost &&
+                !scheduledActivityIds.includes(a.id)
+            )
+            .slice(0, 2)
+            .map((a) => ({
+              ...a,
+              city: { id: seedCity.id, name: seedCity.name, country: seedCity.country },
+            }));
+        }
+      }
+
+      for (const alt of cheaperActivities) {
+        const potentialSavings = Math.round((currentCost - alt.estimatedCost) * 100) / 100;
+        suggestions.push({
+          itineraryItemId: item.id,
+          dayNumber: item.dayNumber,
+          currentActivity: item.title,
+          currentCost,
+          category: alt.category,
+          city: {
+            id: alt.city.id,
+            name: alt.city.name,
+            country: alt.city.country,
+          },
+          alternative: {
+            activityId: alt.id,
+            name: alt.name,
+            description: alt.description || null,
+            category: alt.category,
+            duration: alt.duration,
+            cost: alt.estimatedCost,
+            image: alt.image || null,
+          },
+          potentialSavings,
+        });
+      }
+    }
+
+    // Find free or very-low-cost activities in the trip's cities that are not yet in the itinerary
+    let freeActivitiesFromDb: Array<any> = [];
+
+    if (process.env.DATABASE_URL) {
+      try {
+        freeActivitiesFromDb = await prisma.activity.findMany({
+          where: {
+            cityId: cityIds.length > 0 ? { in: cityIds } : undefined,
+            estimatedCost: { lte: 0 },
+            id: { notIn: scheduledActivityIds },
+          },
+          include: { city: true },
+          take: 5,
+        });
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (freeActivitiesFromDb.length === 0 && cityIds.length > 0) {
+      for (const cId of cityIds) {
+        const seedCity = SEED_CITIES.find((c) => c.id === cId);
+        if (seedCity) {
+          const freeSeedActs = seedCity.activities
+            .filter((a) => a.estimatedCost <= 0 && !scheduledActivityIds.includes(a.id))
+            .map((a) => ({
+              ...a,
+              city: { id: seedCity.id, name: seedCity.name, country: seedCity.country },
+            }));
+          freeActivitiesFromDb.push(...freeSeedActs);
+        }
+      }
+    }
+
+    const freeAlternatives = freeActivitiesFromDb.map((act) => ({
+      activityId: act.id,
+      name: act.name,
+      description: act.description || null,
+      category: act.category,
+      duration: act.duration,
+      cost: act.estimatedCost,
+      city: {
+        id: act.city.id,
+        name: act.city.name,
+        country: act.city.country,
+      },
+      image: act.image || null,
+    }));
+
+    // Calculate maximum potential savings by picking the best alternative per distinct itinerary item
+    const maxSavingsPerItem = new Map<string, number>();
+    for (const s of suggestions) {
+      const existing = maxSavingsPerItem.get(s.itineraryItemId) || 0;
+      if (s.potentialSavings > existing) {
+        maxSavingsPerItem.set(s.itineraryItemId, s.potentialSavings);
+      }
+    }
+
+    let totalPotentialSavings = 0;
+    for (const savings of maxSavingsPerItem.values()) {
+      totalPotentialSavings += savings;
+    }
+    totalPotentialSavings = Math.round(totalPotentialSavings * 100) / 100;
+
+    const projectedSpentWithOptimizations = Math.max(
+      0,
+      Math.round((spent - totalPotentialSavings) * 100) / 100
+    );
+    const canResolveOverBudget = overBudget ? projectedSpentWithOptimizations <= budget : true;
+
+    return {
+      tripId,
+      tripName: budgetOverview.tripName,
+      currency,
+      budget,
+      currentSpent: spent,
+      isOverBudget: overBudget,
+      overBudgetAmount,
+      totalPotentialSavings,
+      projectedSpentWithOptimizations,
+      canResolveOverBudget,
+      suggestionsCount: suggestions.length,
+      suggestions,
+      freeAlternativesCount: freeAlternatives.length,
+      freeAlternatives,
     };
   }
 }

@@ -65,6 +65,7 @@ router.put('/:tripId/itinerary/reorder', validateBody(reorderItinerarySchema), I
 
 // Trip Budget & Expense routes
 router.get('/:tripId/budget', validateParams(tripBudgetParamSchema), BudgetController.getTripBudget);
+router.get('/:tripId/budget/optimize', validateParams(tripBudgetParamSchema), BudgetController.optimizeTripBudget);
 router.post('/:tripId/expenses', validateParams(tripBudgetParamSchema), validateBody(createExpenseSchema), BudgetController.createExpense);
 
 // Trip Share routes

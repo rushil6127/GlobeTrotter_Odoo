@@ -28,6 +28,29 @@ export class BudgetController {
   }
 
   /**
+   * GET /api/trips/:tripId/budget/optimize
+   * Smart Budget Optimizer: suggests cheaper activity alternatives & free activities.
+   */
+  static async optimizeTripBudget(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        sendError(res, 'Unauthenticated', 'UNAUTHENTICATED', 401);
+        return;
+      }
+
+      const { tripId } = req.params;
+      const optimization = await BudgetService.optimizeTripBudget(tripId, req.user.id);
+      sendSuccess(res, optimization, 'Budget optimization suggestions retrieved successfully', 200);
+    } catch (error: any) {
+      if (error.statusCode) {
+        sendError(res, error.message, error.code, error.statusCode);
+        return;
+      }
+      sendError(res, error.message || 'Failed to optimize trip budget', 'BUDGET_OPTIMIZE_ERROR', 500);
+    }
+  }
+
+  /**
    * POST /api/trips/:tripId/expenses
    * Record a new expense item under a trip.
    */
