@@ -15,19 +15,39 @@ import { useApiData } from "@/lib/hooks/useApiData";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api/client";
 import {
-  getTripItinerary, createItineraryItem, updateItineraryItem, deleteItineraryItem,
-  reorderItinerary, type ItineraryItem, type ItineraryDay, type ItineraryResponse,
+  getTripItinerary,
+  createItineraryItem,
+  updateItineraryItem,
+  deleteItineraryItem,
+  reorderItinerary,
+  type ItineraryItem,
+  type ItineraryDay,
+  type ItineraryResponse,
 } from "@/lib/api/itinerary";
 import { getTrip, type Trip } from "@/lib/api/trips";
 import {
-  Plus, Clock, DollarSign, Pencil, Trash2, AlertCircle, RefreshCw,
-  CalendarDays, ChevronDown, ChevronUp, GripVertical,
+  Plus,
+  Clock,
+  DollarSign,
+  Pencil,
+  Trash2,
+  AlertCircle,
+  RefreshCw,
+  CalendarDays,
+  ChevronDown,
+  ChevronUp,
+  GripVertical,
+  MapPin,
+  Sparkles,
+  ArrowRight,
+  Wallet,
 } from "lucide-react";
 
 /* ── helpers ── */
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
+
 function formatCost(n: number | null | undefined) {
   if (!n) return null;
   return `₹${n.toLocaleString()}`;
@@ -35,12 +55,14 @@ function formatCost(n: number | null | undefined) {
 
 /* ── Category badge color ── */
 const categoryColors: Record<string, string> = {
-  Sightseeing: "text-sky-600 bg-sky-50",
-  Food: "text-amber-600 bg-amber-50",
-  Adventure: "text-orange-600 bg-orange-50",
-  "Water Sports": "text-blue-600 bg-blue-50",
-  Culture: "text-purple-600 bg-purple-50",
-  Shopping: "text-pink-600 bg-pink-50",
+  Sightseeing: "text-sky-700 bg-sky-50 border-sky-200/60",
+  Food: "text-amber-700 bg-amber-50 border-amber-200/60",
+  Adventure: "text-orange-700 bg-orange-50 border-orange-200/60",
+  "Water Sports": "text-blue-700 bg-blue-50 border-blue-200/60",
+  Culture: "text-purple-700 bg-purple-50 border-purple-200/60",
+  Shopping: "text-pink-700 bg-pink-50 border-pink-200/60",
+  Nightlife: "text-indigo-700 bg-indigo-50 border-indigo-200/60",
+  Relaxation: "text-teal-700 bg-teal-50 border-teal-200/60",
 };
 
 /* ── Itinerary Item Card ── */
@@ -61,71 +83,92 @@ function ItineraryItemCard({
   onDelete: (item: ItineraryItem) => void;
   onMove: (item: ItineraryItem, dir: -1 | 1) => void;
 }) {
-  const catClass = item.activity?.category
-    ? (categoryColors[item.activity.category] ?? "text-neutral-600 bg-neutral-100")
-    : "text-neutral-600 bg-neutral-100";
+  const cat = item.activity?.category;
+  const catClass = cat
+    ? categoryColors[cat] ?? "text-neutral-700 bg-neutral-100 border-neutral-200"
+    : "text-neutral-700 bg-neutral-100 border-neutral-200";
 
   return (
-    <div className="flex gap-3 group bg-white rounded-xl border border-neutral-100 px-4 py-3 shadow-sm hover:shadow-md transition-shadow">
+    <div className="flex items-start gap-3.5 group bg-white/90 backdrop-blur-sm rounded-2xl border border-neutral-200/70 p-4 sm:p-5 shadow-sm hover:shadow-md transition-all">
+      {/* Move Up/Down Controls */}
       {canEdit && (
-        <div className="flex flex-col gap-1 shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex flex-col gap-1 shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onMove(item, -1)}
             disabled={idx === 0}
-            className="h-5 w-5 rounded flex items-center justify-center text-neutral-300 hover:text-primary disabled:opacity-20 transition-colors"
+            className="h-6 w-6 rounded-md flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-neutral-100 disabled:opacity-20 transition-colors"
+            title="Move up"
           >
             <ChevronUp className="h-4 w-4" />
           </button>
           <button
             onClick={() => onMove(item, 1)}
             disabled={idx === total - 1}
-            className="h-5 w-5 rounded flex items-center justify-center text-neutral-300 hover:text-primary disabled:opacity-20 transition-colors"
+            className="h-6 w-6 rounded-md flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-neutral-100 disabled:opacity-20 transition-colors"
+            title="Move down"
           >
             <ChevronDown className="h-4 w-4" />
           </button>
         </div>
       )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-semibold text-neutral-900">{item.title}</p>
+
+      {/* Item Details */}
+      <div className="flex-1 min-w-0 space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h4 className="text-base font-bold text-neutral-900 leading-snug group-hover:text-primary transition-colors">
+              {item.title}
+            </h4>
+          </div>
+
+          {/* Action Buttons */}
           {canEdit && (
             <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => onEdit(item)}
-                className="h-7 w-7 rounded-lg flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors"
+                className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors"
+                title="Edit item"
               >
-                <Pencil className="h-3.5 w-3.5" />
+                <Pencil className="h-4 w-4" />
               </button>
               <button
                 onClick={() => onDelete(item)}
-                className="h-7 w-7 rounded-lg flex items-center justify-center text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                title="Delete item"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </div>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-3 mt-1.5">
+
+        {/* Time, Cost & Category Pills */}
+        <div className="flex flex-wrap items-center gap-2.5 pt-1">
           {item.startTime && (
-            <span className="flex items-center gap-1 text-xs text-neutral-500">
-              <Clock className="h-3 w-3" />
-              {item.startTime}{item.endTime ? ` – ${item.endTime}` : ""}
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg">
+              <Clock className="h-3.5 w-3.5" />
+              {item.startTime}
+              {item.endTime ? ` – ${item.endTime}` : ""}
             </span>
           )}
           {item.estimatedCost != null && item.estimatedCost > 0 && (
-            <span className="flex items-center gap-1 text-xs text-neutral-500">
-              <DollarSign className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-neutral-800 bg-neutral-100 px-2.5 py-1 rounded-lg">
+              <DollarSign className="h-3.5 w-3.5 text-secondary-600" />
               {item.estimatedCost.toLocaleString()}
             </span>
           )}
-          {item.activity?.category && (
-            <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", catClass)}>
-              {item.activity.category}
+          {cat && (
+            <span className={cn("text-xs px-2.5 py-1 rounded-lg font-semibold border", catClass)}>
+              {cat}
             </span>
           )}
         </div>
+
+        {/* Notes */}
         {item.notes && (
-          <p className="text-xs text-neutral-400 mt-1.5 line-clamp-2">{item.notes}</p>
+          <p className="text-xs text-neutral-600 bg-neutral-50/80 p-2.5 rounded-xl border border-neutral-100 mt-1 leading-relaxed">
+            {item.notes}
+          </p>
         )}
       </div>
     </div>
@@ -138,397 +181,461 @@ function ItemModal({
   onClose,
   tripId,
   editItem,
-  totalDays,
+  defaultDayNumber = 1,
+  totalDays = 1,
   onSaved,
 }: {
   open: boolean;
   onClose: () => void;
   tripId: string;
-  editItem?: ItineraryItem;
-  totalDays: number;
+  editItem: ItineraryItem | null;
+  defaultDayNumber?: number;
+  totalDays?: number;
   onSaved: () => void;
 }) {
   const [title, setTitle] = useState(editItem?.title ?? "");
-  const [dayNumber, setDayNumber] = useState(editItem?.dayNumber ?? 1);
+  const [dayNumber, setDayNumber] = useState(editItem?.dayNumber ?? defaultDayNumber);
   const [startTime, setStartTime] = useState(editItem?.startTime ?? "");
   const [endTime, setEndTime] = useState(editItem?.endTime ?? "");
-  const [cost, setCost] = useState(editItem?.estimatedCost != null ? String(editItem.estimatedCost) : "");
+  const [estimatedCost, setEstimatedCost] = useState(
+    editItem?.estimatedCost != null ? String(editItem.estimatedCost) : ""
+  );
   const [notes, setNotes] = useState(editItem?.notes ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // Reset when editItem changes
   React.useEffect(() => {
-    if (open) {
-      setTitle(editItem?.title ?? "");
-      setDayNumber(editItem?.dayNumber ?? 1);
-      setStartTime(editItem?.startTime ?? "");
-      setEndTime(editItem?.endTime ?? "");
-      setCost(editItem?.estimatedCost != null ? String(editItem.estimatedCost) : "");
-      setNotes(editItem?.notes ?? "");
-      setError("");
+    if (editItem) {
+      setTitle(editItem.title);
+      setDayNumber(editItem.dayNumber);
+      setStartTime(editItem.startTime ?? "");
+      setEndTime(editItem.endTime ?? "");
+      setEstimatedCost(editItem.estimatedCost != null ? String(editItem.estimatedCost) : "");
+      setNotes(editItem.notes ?? "");
+    } else {
+      setTitle("");
+      setDayNumber(defaultDayNumber);
+      setStartTime("");
+      setEndTime("");
+      setEstimatedCost("");
+      setNotes("");
     }
-  }, [open, editItem]);
+  }, [editItem, defaultDayNumber]);
 
-  async function handleSave() {
-    if (!title.trim()) { setError("Title is required."); return; }
-    setSaving(true);
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!title.trim()) {
+      setError("Title is required.");
+      return;
+    }
     setError("");
+    setSaving(true);
     try {
-      const payload = {
-        title: title.trim(),
-        dayNumber,
-        startTime: startTime || undefined,
-        endTime: endTime || undefined,
-        estimatedCost: cost ? parseFloat(cost) : undefined,
-        notes: notes.trim() || undefined,
-      };
       if (editItem) {
-        await updateItineraryItem(editItem.id, payload);
+        await updateItineraryItem(editItem.id, {
+          title: title.trim(),
+          dayNumber: Number(dayNumber) || 1,
+          startTime: startTime || undefined,
+          endTime: endTime || undefined,
+          estimatedCost: estimatedCost ? Number(estimatedCost) : undefined,
+          notes: notes.trim() || undefined,
+        });
       } else {
-        await createItineraryItem(tripId, payload);
+        await createItineraryItem(tripId, {
+          title: title.trim(),
+          dayNumber: Number(dayNumber) || 1,
+          startTime: startTime || undefined,
+          endTime: endTime || undefined,
+          estimatedCost: estimatedCost ? Number(estimatedCost) : undefined,
+          notes: notes.trim() || undefined,
+        });
       }
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to save item.");
-    } finally { setSaving(false); }
+      setError(err instanceof ApiError ? err.message : "Failed to save itinerary item.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={editItem ? "Edit Itinerary Item" : "Add Itinerary Item"}
-      size="lg"
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button variant="primary" onClick={handleSave} loading={saving}>
-            {editItem ? "Save Changes" : "Add Item"}
-          </Button>
-        </>
-      }
+      title={editItem ? "Edit Scheduled Item" : "Schedule New Activity"}
+      size="md"
     >
-      <div className="space-y-4">
+      <form onSubmit={handleSave} className="space-y-4">
+        {error && <p className="text-xs text-red-600 bg-red-50 p-3 rounded-xl">{error}</p>}
         <Input
           id="item-title"
-          label="Activity / Title"
-          placeholder="e.g. Visit Senso-ji Temple"
+          label="Activity Title"
+          placeholder="e.g. Scuba Diving at Grand Island"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
-        <div>
-          <label className="text-sm font-medium text-neutral-700 block mb-1.5">Day</label>
-          <select
-            value={dayNumber}
-            onChange={(e) => setDayNumber(Number(e.target.value))}
-            className="w-full h-10 rounded-xl border border-neutral-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            {Array.from({ length: totalDays }, (_, i) => i + 1).map((d) => (
-              <option key={d} value={d}>Day {d}</option>
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-neutral-700">Select Day</label>
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: totalDays }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setDayNumber(i + 1)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all",
+                  dayNumber === i + 1
+                    ? "bg-primary text-white shadow-sm shadow-primary/20"
+                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                )}
+              >
+                Day {i + 1}
+              </button>
             ))}
-          </select>
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Input id="item-start" label="Start Time" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-          <Input id="item-end" label="End Time" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+          <Input
+            id="item-start"
+            label="Start Time"
+            type="time"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+          />
+          <Input
+            id="item-end"
+            label="End Time"
+            type="time"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+          />
         </div>
         <Input
           id="item-cost"
-          label="Estimated Cost (optional)"
+          label="Estimated Cost (₹)"
           type="number"
           min="0"
-          placeholder="0"
-          value={cost}
-          onChange={(e) => setCost(e.target.value)}
-          leftIcon={<DollarSign className="h-4 w-4" />}
+          placeholder="e.g. 1500"
+          value={estimatedCost}
+          onChange={(e) => setEstimatedCost(e.target.value)}
         />
-        <div>
-          <label className="text-sm font-medium text-neutral-700 block mb-1.5">Notes (optional)</label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-medium text-neutral-700">Notes & Tips</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            rows={2}
-            placeholder="Any details, reminders, or tips…"
-            className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+            rows={3}
+            className="w-full rounded-xl border border-neutral-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            placeholder="Booking confirmation, what to pack, meeting point…"
           />
         </div>
-        {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2">{error}</p>}
-      </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button variant="ghost" type="button" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" loading={saving}>
+            {editItem ? "Save Changes" : "Schedule Activity"}
+          </Button>
+        </div>
+      </form>
     </Modal>
   );
 }
 
-/* ── Day Group ── */
-function DayGroup({
-  day,
-  canEdit,
-  onEdit,
-  onDelete,
-  onMove,
-}: {
-  day: ItineraryDay;
-  canEdit: boolean;
-  onEdit: (item: ItineraryItem) => void;
-  onDelete: (item: ItineraryItem) => void;
-  onMove: (item: ItineraryItem, dir: -1 | 1) => void;
-}) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  return (
-    <div className="space-y-2">
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="w-full flex items-center justify-between px-4 py-2.5 bg-white/60 rounded-xl border border-neutral-100 hover:bg-white/80 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-            <span className="text-xs font-bold text-primary">{day.dayNumber}</span>
-          </div>
-          <div className="text-left">
-            <p className="text-sm font-semibold text-neutral-900">Day {day.dayNumber}</p>
-            <p className="text-xs text-neutral-500">{fmtDate(day.date)}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          {day.dayEstimatedCost > 0 && (
-            <Badge variant="default" size="sm">₹{day.dayEstimatedCost.toLocaleString()}</Badge>
-          )}
-          <Badge variant="info" size="sm">{day.itemsCount} item{day.itemsCount !== 1 ? "s" : ""}</Badge>
-          {collapsed ? <ChevronDown className="h-4 w-4 text-neutral-400" /> : <ChevronUp className="h-4 w-4 text-neutral-400" />}
-        </div>
-      </button>
-
-      {!collapsed && (
-        <div className="space-y-2 pl-3">
-          {day.items.length === 0 ? (
-            <p className="text-sm text-neutral-400 px-4 py-2">No items yet for this day.</p>
-          ) : (
-            day.items.map((item, idx) => (
-              <ItineraryItemCard
-                key={item.id}
-                item={item}
-                idx={idx}
-                total={day.items.length}
-                canEdit={canEdit}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onMove={onMove}
-              />
-            ))
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Main Page ── */
+/* ── Main Itinerary Page ── */
 export default function ItineraryPage() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
+  const tripId = params.id;
   const router = useRouter();
   const { user } = useAuth();
 
-  const { data: trip } = useApiData<Trip>(() => getTrip(id), [id]);
-  const { data: itin, isLoading, error, refetch } = useApiData<ItineraryResponse>(
-    () => getTripItinerary(id), [id]
-  );
+  const { data: trip, isLoading: tripLoading } = useApiData<Trip>(() => getTrip(tripId), [tripId]);
+  const {
+    data: itinData,
+    isLoading,
+    error,
+    refetch,
+  } = useApiData<ItineraryResponse>(() => getTripItinerary(tripId), [tripId]);
 
-  const [addOpen, setAddOpen] = useState(false);
-  const [editItem, setEditItem] = useState<ItineraryItem | undefined>();
-  const [deleteItem, setDeleteItem] = useState<ItineraryItem | undefined>();
+  const [selectedDayNum, setSelectedDayNum] = useState<number | "all">("all");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState<ItineraryItem | null>(null);
+  const [deleteItem, setDeleteItem] = useState<ItineraryItem | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [moveError, setMoveError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
-  const canEdit = !trip || user?.id === trip?.userId ||
-    trip?.tripMembers?.some((m) => m.user?.id === user?.id && m.role !== "VIEWER");
+  const days = itinData?.days ?? [];
+  const totalItems = itinData?.totalItems ?? 0;
+  const totalDaysCount = days.length || (trip ? Math.max(1, Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / 86400000) + 1) : 1);
+  const filteredDays = selectedDayNum === "all" ? days : days.filter((d) => d.dayNumber === selectedDayNum);
 
-  async function handleDelete() {
+  async function handleDeleteConfirm() {
     if (!deleteItem) return;
     setDeleting(true);
+    setDeleteError("");
     try {
       await deleteItineraryItem(deleteItem.id);
-      setDeleteItem(undefined);
-      refetch();
-    } catch { setDeleting(false); }
-  }
-
-  async function handleMove(item: ItineraryItem, dir: -1 | 1) {
-    if (!itin) return;
-    const day = itin.days.find((d) => d.dayNumber === item.dayNumber);
-    if (!day) return;
-    const sorted = [...day.items].sort((a, b) => a.order - b.order);
-    const idx = sorted.findIndex((i) => i.id === item.id);
-    const nextIdx = idx + dir;
-    if (nextIdx < 0 || nextIdx >= sorted.length) return;
-
-    const reordered = [...sorted];
-    [reordered[idx], reordered[nextIdx]] = [reordered[nextIdx], reordered[idx]];
-    const itemOrders = reordered.map((i, pos) => ({ itemId: i.id, order: pos }));
-
-    setMoveError("");
-    try {
-      await reorderItinerary(id, itemOrders);
+      setDeleteItem(null);
       refetch();
     } catch (err) {
-      setMoveError(err instanceof ApiError ? err.message : "Reorder failed.");
+      setDeleteError(err instanceof ApiError ? err.message : "Failed to delete item.");
+    } finally {
+      setDeleting(false);
     }
   }
 
-  const totalDays = itin?.trip.totalDays ?? 1;
-  const totalCost = itin?.totalEstimatedCost ?? 0;
+  async function handleMove(day: ItineraryDay, item: ItineraryItem, dir: -1 | 1) {
+    const items = [...day.items];
+    const idx = items.findIndex((i) => i.id === item.id);
+    if (idx === -1) return;
+    const target = idx + dir;
+    if (target < 0 || target >= items.length) return;
+    const [moved] = items.splice(idx, 1);
+    items.splice(target, 0, moved);
+    try {
+      await reorderItinerary(
+        tripId,
+        items.map((i, o) => ({ itemId: i.id, order: o }))
+      );
+      refetch();
+    } catch {
+      /* noop */
+    }
+  }
 
   return (
-    <PageShell currentPath="/trips">
-      <div className="max-w-4xl mx-auto pt-2 md:pt-6 pb-32 space-y-6">
-
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-neutral-500">
-          <Link href="/trips" className="hover:text-primary transition-colors">Trips</Link>
-          <span>/</span>
-          {trip && (
-            <>
-              <Link href={`/trips/${id}`} className="hover:text-primary transition-colors">{trip.name}</Link>
-              <span>/</span>
-            </>
-          )}
-          <span className="text-neutral-900 font-medium">Itinerary</span>
-        </nav>
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-neutral-900">
-              {trip?.name ?? "Itinerary"}
-            </h1>
-            {itin && (
-              <p className="text-neutral-500 text-sm mt-0.5">
-                {itin.totalItems} items · {totalDays} days ·{" "}
-                {totalCost > 0 ? `₹${totalCost.toLocaleString()} estimated` : "No cost tracked yet"}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-3">
-            {canEdit && (
-              <Button
-                variant="primary"
-                leftIcon={<Plus className="h-4 w-4" />}
-                onClick={() => { setEditItem(undefined); setAddOpen(true); }}
-              >
-                Add Item
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={() => router.push(`/trips/${id}`)}
-            >
-              Trip Details
-            </Button>
-          </div>
+    <PageShell currentPath="/trips" userName={user?.name ?? undefined}>
+      <div className="max-w-5xl mx-auto space-y-8 pb-32 pt-2 md:pt-4">
+        {/* Navigation Breadcrumb Tabs */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
+          <Link
+            href={`/trips/${tripId}`}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100 bg-white border border-neutral-200/80 shadow-sm shrink-0"
+          >
+            Overview & Stops
+          </Link>
+          <Link
+            href={`/trips/${tripId}/itinerary`}
+            className="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-sm shrink-0 flex items-center gap-1.5"
+          >
+            <Clock className="h-4 w-4" />
+            Day-by-Day Itinerary
+          </Link>
+          <Link
+            href={`/trips/${tripId}/budget`}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100 bg-white border border-neutral-200/80 shadow-sm shrink-0 flex items-center gap-1.5"
+          >
+            <Wallet className="h-4 w-4 text-secondary-600" />
+            Budget & Expenses
+          </Link>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 flex items-center gap-4">
-            <AlertCircle className="h-6 w-6 text-red-500 shrink-0" />
-            <p className="text-sm text-neutral-700 flex-1">{error.message}</p>
-            <Button size="sm" variant="outline" leftIcon={<RefreshCw className="h-3 w-3" />} onClick={refetch}>Retry</Button>
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-display font-bold text-neutral-900 tracking-tight">
+              {trip?.name ? `${trip.name} Itinerary` : "Trip Itinerary"}
+            </h1>
+            <p className="text-sm text-neutral-500 mt-1">
+              {totalItems} scheduled activities across {days.length} days
+            </p>
           </div>
-        )}
+          <Button
+            variant="primary"
+            size="lg"
+            leftIcon={<Plus className="h-5 w-5" />}
+            onClick={() => {
+              setEditItem(null);
+              setModalOpen(true);
+            }}
+            className="shadow-md shadow-primary/20 hover:shadow-lg transition-all shrink-0"
+          >
+            Add Activity
+          </Button>
+        </div>
 
-        {/* Loading */}
-        {isLoading && (
-          <div className="space-y-4">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton variant="rounded" height={44} />
-                <Skeleton variant="rounded" height={64} className="ml-3" />
-              </div>
+        {/* Day Selector Tabs */}
+        {days.length > 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <button
+              onClick={() => setSelectedDayNum("all")}
+              className={cn(
+                "px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0",
+                selectedDayNum === "all"
+                  ? "bg-primary text-white shadow-sm shadow-primary/20"
+                  : "bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50"
+              )}
+            >
+              All Days ({totalItems})
+            </button>
+            {days.map((d) => (
+              <button
+                key={d.dayNumber}
+                onClick={() => setSelectedDayNum(d.dayNumber)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5",
+                  selectedDayNum === d.dayNumber
+                    ? "bg-primary text-white shadow-sm shadow-primary/20"
+                    : "bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50"
+                )}
+              >
+                <span>Day {d.dayNumber}</span>
+                <span className="text-[10px] opacity-75 font-normal">({d.itemsCount})</span>
+              </button>
             ))}
           </div>
         )}
 
-        {/* Empty */}
-        {!isLoading && !error && itin?.totalItems === 0 && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-neutral-100 p-10 shadow-sm">
+        {/* Loading Skeleton */}
+        {isLoading && (
+          <div className="space-y-6">
+            <Skeleton variant="rounded" height={80} />
+            <Skeleton variant="rounded" height={100} />
+            <Skeleton variant="rounded" height={100} />
+          </div>
+        )}
+
+        {/* Error Alert */}
+        {!isLoading && error && (
+          <div className="bg-red-50/90 backdrop-blur-sm border border-red-200/80 rounded-3xl p-8 text-center space-y-4">
+            <AlertCircle className="h-8 w-8 text-red-500 mx-auto" />
+            <div>
+              <h3 className="font-bold text-neutral-900">Failed to load itinerary</h3>
+              <p className="text-xs text-neutral-600 mt-1">{error.message}</p>
+            </div>
+            <Button variant="outline" leftIcon={<RefreshCw className="h-4 w-4" />} onClick={refetch}>
+              Try Again
+            </Button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !error && totalItems === 0 && (
+          <div className="bg-white/85 backdrop-blur-xl rounded-3xl border border-neutral-200/60 p-10 sm:p-14 shadow-sm text-center">
             <EmptyState
-              title="No itinerary items yet"
-              description="Add activities, meals, or transport stops to plan your days."
+              variant="activities"
+              title="No activities scheduled yet"
+              description="Build your day-wise plan. Schedule sightseeing, excursions, beach visits, and dining."
               action={
-                canEdit ? (
-                  <Button
-                    variant="primary"
-                    leftIcon={<Plus className="h-4 w-4" />}
-                    onClick={() => setAddOpen(true)}
-                  >
-                    Add First Item
-                  </Button>
-                ) : undefined
+                <Button
+                  variant="primary"
+                  size="lg"
+                  leftIcon={<Plus className="h-5 w-5" />}
+                  onClick={() => {
+                    setEditItem(null);
+                    setModalOpen(true);
+                  }}
+                  className="shadow-md shadow-primary/20"
+                >
+                  Schedule First Activity
+                </Button>
               }
             />
           </div>
         )}
 
-        {/* Days */}
-        {!isLoading && !error && itin && itin.days.length > 0 && (
-          <div className="space-y-4">
-            {itin.days.map((day) => (
-              <DayGroup
-                key={day.dayNumber}
-                day={day}
-                canEdit={!!canEdit}
-                onEdit={(item) => { setEditItem(item); setAddOpen(true); }}
-                onDelete={(item) => setDeleteItem(item)}
-                onMove={handleMove}
-              />
+        {/* Days List */}
+        {!isLoading && !error && filteredDays.length > 0 && (
+          <div className="space-y-8">
+            {filteredDays.map((day) => (
+              <div key={day.dayNumber} className="space-y-4">
+                {/* Day Header Banner */}
+                <div className="flex items-center justify-between py-3.5 px-5 rounded-2xl bg-white/90 backdrop-blur-md border border-neutral-200/70 shadow-sm">
+                  <div className="flex items-center gap-3.5">
+                    <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary to-primary-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-primary/20">
+                      {day.dayNumber}
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-neutral-900 text-base">
+                        Day {day.dayNumber}
+                      </h3>
+                      <p className="text-xs text-neutral-500 font-medium mt-0.5">
+                        {fmtDate(day.date)}
+                        {day.dayEstimatedCost > 0 && (
+                          <span className="ml-2 font-bold text-neutral-800">
+                            · Estimated {formatCost(day.dayEstimatedCost)}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    leftIcon={<Plus className="h-3.5 w-3.5" />}
+                    onClick={() => {
+                      setEditItem(null);
+                      setModalOpen(true);
+                    }}
+                  >
+                    Add to Day {day.dayNumber}
+                  </Button>
+                </div>
+
+                {/* Day Items */}
+                {day.items.length === 0 ? (
+                  <div className="bg-neutral-50/60 rounded-2xl p-6 text-center border border-dashed border-neutral-200 text-neutral-400 text-xs">
+                    No activities scheduled for Day {day.dayNumber}. Click &quot;Add to Day {day.dayNumber}&quot; to plan this day.
+                  </div>
+                ) : (
+                  <div className="space-y-3 pl-2 sm:pl-4">
+                    {day.items.map((item, idx) => (
+                      <ItineraryItemCard
+                        key={item.id}
+                        item={item}
+                        idx={idx}
+                        total={day.items.length}
+                        canEdit={true}
+                        onEdit={(i) => {
+                          setEditItem(i);
+                          setModalOpen(true);
+                        }}
+                        onDelete={(i) => setDeleteItem(i)}
+                        onMove={(i, dir) => handleMove(day, i, dir)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
-          </div>
-        )}
-
-        {moveError && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2">{moveError}</p>
-        )}
-
-        {/* Discover CTA */}
-        {!isLoading && !error && (
-          <div className="bg-gradient-to-r from-accent/10 to-primary/10 rounded-2xl border border-accent/20 p-5 flex items-center justify-between gap-4">
-            <div>
-              <p className="font-semibold text-neutral-900 text-sm">Need activity ideas?</p>
-              <p className="text-xs text-neutral-500">Browse our catalog and add activities directly to this itinerary.</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/discover/activities")}
-            >
-              Discover
-            </Button>
           </div>
         )}
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Add / Edit Item Modal */}
       <ItemModal
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
-        tripId={id}
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditItem(null);
+        }}
+        tripId={tripId}
         editItem={editItem}
-        totalDays={totalDays}
+        defaultDayNumber={typeof selectedDayNum === "number" ? selectedDayNum : 1}
+        totalDays={totalDaysCount}
         onSaved={refetch}
       />
 
-      {/* Delete Confirm */}
-      <ConfirmModal
-        open={!!deleteItem}
-        onClose={() => setDeleteItem(undefined)}
-        onConfirm={handleDelete}
-        title="Delete item"
-        message={`Remove "${deleteItem?.title}"? This cannot be undone.`}
-        confirmLabel="Delete"
-        variant="danger"
-        loading={deleting}
-      />
+      {/* Delete Item Confirmation Modal */}
+      {deleteItem && (
+        <ConfirmModal
+          open={Boolean(deleteItem)}
+          title={`Delete "${deleteItem.title}"?`}
+          message="Are you sure you want to remove this activity from your itinerary?"
+          confirmLabel="Delete Activity"
+          cancelLabel="Cancel"
+          variant="danger"
+          loading={deleting}
+          onConfirm={handleDeleteConfirm}
+          onClose={() => {
+            setDeleteItem(null);
+            setDeleteError("");
+          }}
+        />
+      )}
     </PageShell>
   );
 }

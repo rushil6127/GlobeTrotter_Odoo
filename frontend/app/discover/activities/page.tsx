@@ -7,20 +7,32 @@ import { cn } from "@/lib/utils";
 import { PageShell } from "@/components/navigation/PlaceholderPage";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Skeleton } from "@/components/ui/Loader";
+import { Skeleton, CardSkeleton } from "@/components/ui/Loader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { useApiData } from "@/lib/hooks/useApiData";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api/client";
-import { getActivities, type Activity, type ActivityListResponse } from "@/lib/api/cities";
-import { getCities, type City } from "@/lib/api/cities";
-import { getTrips, getTripCities, type Trip, type TripCity } from "@/lib/api/trips";
+import { getActivities, type Activity, type ActivityListResponse, getCities, type City, type CityListResponse } from "@/lib/api/cities";
+import { getTrips, type Trip } from "@/lib/api/trips";
 import { createItineraryItem } from "@/lib/api/itinerary";
 import {
-  Search, Filter, Clock, DollarSign, Plus, Check, X, ChevronLeft, ChevronRight,
-  AlertCircle, RefreshCw, SlidersHorizontal, ArrowLeft,
+  Search,
+  Filter,
+  Clock,
+  DollarSign,
+  Plus,
+  Check,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  RefreshCw,
+  SlidersHorizontal,
+  ArrowLeft,
+  MapPin,
+  Sparkles,
 } from "lucide-react";
 
 const CATEGORIES = ["All", "Sightseeing", "Food", "Adventure", "Water Sports", "Culture", "Shopping"];
@@ -64,13 +76,16 @@ function AddToItineraryModal({
     try {
       const trip = trips?.find((t) => t.id === tripId);
       if (trip) {
-        const days = Math.max(1, Math.ceil(
-          (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / 86400000
-        ));
+        const days = Math.max(
+          1,
+          Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / 86400000) + 1
+        );
         setTotalDays(days);
         setSelectedDay(1);
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   async function handleAdd() {
@@ -90,32 +105,33 @@ function AddToItineraryModal({
       setAddedTripId(selectedTrip);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to add to itinerary.");
-    } finally { setAdding(false); }
+    } finally {
+      setAdding(false);
+    }
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={`Add to Itinerary`}
+      title="Add to Itinerary"
       description={activity?.name}
       size="md"
       footer={
         !added ? (
           <>
-            <Button variant="ghost" onClick={onClose} disabled={adding}>Cancel</Button>
-            <Button
-              variant="primary"
-              onClick={handleAdd}
-              loading={adding}
-              disabled={!selectedTrip}
-            >
+            <Button variant="ghost" onClick={onClose} disabled={adding}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleAdd} loading={adding} disabled={!selectedTrip}>
               Add to Itinerary
             </Button>
           </>
         ) : (
           <div className="flex gap-3">
-            <Button variant="ghost" onClick={onClose}>Close</Button>
+            <Button variant="ghost" onClick={onClose}>
+              Close
+            </Button>
             <Link href={`/trips/${addedTripId}/itinerary`}>
               <Button variant="primary">View Itinerary</Button>
             </Link>
@@ -124,73 +140,89 @@ function AddToItineraryModal({
       }
     >
       {added ? (
-        <div className="flex flex-col items-center gap-3 py-4">
-          <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center">
-            <Check className="h-6 w-6 text-success" />
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <div className="h-12 w-12 rounded-2xl bg-success/15 flex items-center justify-center text-success">
+            <Check className="h-6 w-6" />
           </div>
-          <p className="text-sm font-medium text-neutral-900">{activity?.name} added!</p>
+          <div>
+            <p className="text-base font-bold text-neutral-900">{activity?.name} added to Day {selectedDay}!</p>
+            <p className="text-xs text-neutral-500 mt-1">This activity is now scheduled in your itinerary.</p>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
           {tripsLoading ? (
-            <Skeleton variant="text" width="100%" height={36} />
+            <div className="space-y-2">
+              <CardSkeleton />
+            </div>
           ) : !trips || trips.length === 0 ? (
             <div className="text-center py-4 space-y-3">
               <p className="text-sm text-neutral-500">No trips yet. Create a trip first.</p>
               <Link href="/trips/new">
-                <Button size="sm" variant="primary">Create Trip</Button>
+                <Button size="sm" variant="primary">
+                  Create Trip
+                </Button>
               </Link>
             </div>
           ) : (
             <>
-              <div>
-                <label className="text-sm font-medium text-neutral-700 block mb-1.5">Select Trip</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-700">Choose Adventure</label>
                 <select
                   value={selectedTrip}
                   onChange={(e) => handleTripSelect(e.target.value)}
-                  className="w-full h-10 rounded-xl border border-neutral-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full h-10 px-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white cursor-pointer"
                 >
-                  <option value="">— Choose a trip —</option>
+                  <option value="">Select a trip…</option>
                   {trips.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
                   ))}
                 </select>
               </div>
 
               {selectedTrip && (
-                <>
-                  <div>
-                    <label className="text-sm font-medium text-neutral-700 block mb-1.5">Day</label>
-                    <select
-                      value={selectedDay}
-                      onChange={(e) => setSelectedDay(Number(e.target.value))}
-                      className="w-full h-10 rounded-xl border border-neutral-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                      {Array.from({ length: totalDays }, (_, i) => i + 1).map((d) => (
-                        <option key={d} value={d}>Day {d}</option>
-                      ))}
-                    </select>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-700">Select Day</label>
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from({ length: totalDays }).map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setSelectedDay(i + 1)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-xl text-xs font-bold transition-all",
+                          selectedDay === i + 1
+                            ? "bg-primary text-white shadow-sm shadow-primary/20"
+                            : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                        )}
+                      >
+                        Day {i + 1}
+                      </button>
+                    ))}
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      id="act-start-time"
-                      label="Start Time (optional)"
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                    />
-                    <Input
-                      id="act-end-time"
-                      label="End Time (optional)"
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                    />
-                  </div>
-                </>
+                </div>
               )}
 
-              {error && <p className="text-xs text-red-600">{error}</p>}
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  id="act-start"
+                  label="Start Time"
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                />
+                <Input
+                  id="act-end"
+                  label="End Time"
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                />
+              </div>
+
+              {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
             </>
           )}
         </div>
@@ -199,284 +231,325 @@ function AddToItineraryModal({
   );
 }
 
-/* ── Activity Card ── */
-const catColors: Record<string, string> = {
-  Sightseeing: "text-sky-600 bg-sky-50",
-  Food: "text-amber-600 bg-amber-50",
-  Adventure: "text-orange-600 bg-orange-50",
-  "Water Sports": "text-blue-600 bg-blue-50",
-  Culture: "text-purple-600 bg-purple-50",
-  Shopping: "text-pink-600 bg-pink-50",
-};
-
-function ActivityCard({ activity, onAdd }: { activity: Activity; onAdd: (a: Activity) => void }) {
-  const catClass = catColors[activity.category] ?? "text-neutral-600 bg-neutral-100";
+/* ── Activity Card in Grid ── */
+function DiscoverActivityCard({
+  activity,
+  onAdd,
+}: {
+  activity: Activity;
+  onAdd: (act: Activity) => void;
+}) {
   return (
-    <div className="group bg-white/80 backdrop-blur-xl rounded-2xl border border-neutral-100 shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300 flex flex-col">
-      <div className="relative h-36 overflow-hidden">
-        <img
-          src={activity.image ?? "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=70"}
-          alt={activity.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute top-3 left-3">
-          <span className={cn("text-xs px-2 py-1 rounded-full font-medium", catClass)}>{activity.category}</span>
+    <div className="group bg-white/90 backdrop-blur-xl rounded-3xl border border-neutral-200/60 shadow-sm hover:shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+      <div>
+        <div className="relative h-44 overflow-hidden shrink-0">
+          <img
+            src={
+              activity.image ??
+              `https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=70`
+            }
+            alt={activity.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
+          <div className="absolute top-3.5 left-3.5">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-neutral-800 shadow-sm border border-white/40">
+              {activity.category}
+            </span>
+          </div>
+          <div className="absolute bottom-3.5 left-3.5 right-3.5">
+            <h3 className="font-display font-bold text-white text-base leading-snug drop-shadow-sm line-clamp-1">
+              {activity.name}
+            </h3>
+            <p className="text-white/90 text-xs font-medium flex items-center gap-1 mt-0.5">
+              <MapPin className="h-3 w-3 text-primary-300" />
+              {activity.city.name}
+            </p>
+          </div>
+        </div>
+
+        <div className="p-4 sm:p-5 space-y-2">
+          {activity.description && (
+            <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
+              {activity.description}
+            </p>
+          )}
+
+          <div className="flex items-center gap-3 text-xs text-neutral-500 font-medium pt-1">
+            {activity.duration && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5 text-accent" />
+                {activity.duration} mins
+              </span>
+            )}
+            {activity.estimatedCost != null && (
+              <span className="font-bold text-neutral-900 ml-auto">
+                {activity.estimatedCost === 0 ? "Free" : `₹${activity.estimatedCost.toLocaleString()}`}
+              </span>
+            )}
+          </div>
         </div>
       </div>
-      <div className="p-4 flex-1 flex flex-col">
-        <h3 className="text-sm font-semibold text-neutral-900 leading-tight line-clamp-2">{activity.name}</h3>
-        <p className="text-xs text-neutral-500 mt-0.5">{activity.city.name}, {activity.city.country}</p>
-        {activity.description && (
-          <p className="text-xs text-neutral-400 mt-2 line-clamp-2 flex-1">{activity.description}</p>
-        )}
-        <div className="flex items-center gap-4 mt-3">
-          {activity.duration && (
-            <span className="flex items-center gap-1 text-xs text-neutral-500">
-              <Clock className="h-3 w-3" />
-              {activity.duration >= 60 ? `${Math.floor(activity.duration / 60)}h ${activity.duration % 60 > 0 ? `${activity.duration % 60}m` : ""}` : `${activity.duration}m`}
-            </span>
-          )}
-          {activity.estimatedCost != null && (
-            <span className="flex items-center gap-1 text-xs font-medium text-success">
-              <DollarSign className="h-3 w-3" />
-              {activity.estimatedCost === 0 ? "Free" : `₹${activity.estimatedCost.toLocaleString()}`}
-            </span>
-          )}
-        </div>
+
+      <div className="p-4 sm:p-5 pt-0 border-t border-neutral-100 mt-2">
         <Button
           variant="primary"
           size="sm"
-          leftIcon={<Plus className="h-3.5 w-3.5" />}
-          className="mt-3 w-full"
+          fullWidth
+          leftIcon={<Plus className="h-4 w-4" />}
           onClick={() => onAdd(activity)}
+          className="text-xs font-bold shadow-sm"
         >
-          Add to Itinerary
+          Add to Trip
         </Button>
       </div>
     </div>
   );
 }
 
-/* ── Main Page ── */
+/* ── Inner Page Content (Suspense wrapped) ── */
 function DiscoverActivitiesContent() {
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialCityId = searchParams.get("cityId") ?? "";
 
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
-  const [cityId, setCityId] = useState(searchParams.get("cityId") ?? "");
-  const [category, setCategory] = useState(searchParams.get("category") ?? "");
-  const [maxCost, setMaxCost] = useState(searchParams.get("maxCost") ?? "");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [cityId, setCityId] = useState(initialCityId);
   const [page, setPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
-  const [addTarget, setAddTarget] = useState<Activity | null>(null);
-  const [addOpen, setAddOpen] = useState(false);
+  const [addModalAct, setAddModalAct] = useState<Activity | null>(null);
 
-  const { data: cities } = useApiData<{ cities: City[] }>(
-    () => import("@/lib/api/cities").then((m) => m.getCities({ limit: 100 })),
-    []
-  );
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
-  const { data: actData, isLoading, error, refetch } = useApiData<ActivityListResponse>(
+  const { data: cityListData } = useApiData<CityListResponse>(() => getCities({ page: 1, limit: 50 }), []);
+
+  const {
+    data: actData,
+    isLoading,
+    error,
+    refetch,
+  } = useApiData<ActivityListResponse>(
     () =>
       getActivities({
-        cityId: cityId || undefined,
-        category: category && category !== "All" ? category : undefined,
-        maxCost: maxCost ? parseFloat(maxCost) : undefined,
         page,
-        limit: 12,
+        limit: 9,
+        category: category !== "All" ? category : undefined,
+        cityId: cityId || undefined,
       }),
-    [cityId, category, maxCost, page]
+    [page, category, cityId]
   );
 
-  function clearFilters() {
-    setCityId("");
-    setCategory("");
-    setMaxCost("");
-    setPage(1);
-  }
+  const rawActivities = actData?.activities ?? [];
+  const activities = debouncedSearch
+    ? rawActivities.filter(
+        (a) =>
+          a.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+          a.city.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+      )
+    : rawActivities;
 
-  const hasFilters = !!(cityId || (category && category !== "All") || maxCost);
+  const pagination = actData?.pagination;
+  const totalPages = pagination?.totalPages ?? 1;
 
   return (
-    <PageShell currentPath="/discover">
-      <div className="max-w-6xl mx-auto pt-2 md:pt-6 pb-32 space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 pb-32 pt-2 md:pt-4">
+      {/* Navigation Breadcrumb */}
+      <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
+        <Link href="/discover" className="hover:text-primary transition-colors">
+          Discover
+        </Link>
+        <span>/</span>
+        <span className="text-neutral-900 font-semibold">Activities</span>
+      </div>
 
-        {/* Header */}
+      {/* Header & Controls */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-4">
-            <Link href="/discover" className="hover:text-primary transition-colors">Discover</Link>
-            <span>/</span>
-            <span className="text-neutral-900 font-medium">Activities</span>
-          </nav>
-          <h1 className="text-3xl font-display font-bold text-neutral-900">Discover Activities</h1>
-          <p className="text-neutral-500 mt-1">Find things to do and add them straight to your itinerary.</p>
+          <h1 className="text-3xl sm:text-4xl font-display font-bold text-neutral-900 tracking-tight">
+            Discover Activities
+          </h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            Curated sightseeing, food tours, outdoor adventures, and hidden gems
+          </p>
         </div>
 
-        {/* Toolbar */}
-        <div className="flex flex-wrap gap-3">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+        {/* Search & City Filter Bar */}
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
             <input
               type="text"
               placeholder="Search activities…"
-              value={query}
-              onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-              className="w-full h-10 pl-10 pr-4 rounded-xl border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full h-11 pl-10 pr-10 rounded-2xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white shadow-sm"
             />
-          </div>
-
-          {/* Category chips */}
-          <div className="flex flex-wrap gap-1.5">
-            {CATEGORIES.map((cat) => (
+            {search && (
               <button
-                key={cat}
-                onClick={() => { setCategory(cat === "All" ? "" : cat); setPage(1); }}
-                className={cn(
-                  "px-3 py-1.5 rounded-xl text-xs font-medium transition-all",
-                  (cat === "All" && !category) || category === cat
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-white border border-neutral-200 text-neutral-600 hover:border-primary/40"
-                )}
+                onClick={() => setSearch("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
               >
-                {cat}
+                <X className="h-4 w-4" />
               </button>
-            ))}
-          </div>
-
-          <Button
-            variant={showFilters ? "primary" : "outline"}
-            size="sm"
-            leftIcon={<SlidersHorizontal className="h-4 w-4" />}
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            Filters {hasFilters ? `(${[cityId, category && category !== "All", maxCost].filter(Boolean).length})` : ""}
-          </Button>
-        </div>
-
-        {/* Filter Panel */}
-        {showFilters && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-neutral-100 p-4 shadow-sm flex flex-wrap gap-4 items-end">
-            <div className="flex-1 min-w-[160px]">
-              <label className="text-xs font-medium text-neutral-600 block mb-1">City</label>
-              <select
-                value={cityId}
-                onChange={(e) => { setCityId(e.target.value); setPage(1); }}
-                className="w-full h-9 rounded-xl border border-neutral-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="">All Cities</option>
-                {cities?.cities.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-1 min-w-[120px]">
-              <label className="text-xs font-medium text-neutral-600 block mb-1">Max Cost (₹)</label>
-              <input
-                type="number"
-                min="0"
-                placeholder="e.g. 5000"
-                value={maxCost}
-                onChange={(e) => { setMaxCost(e.target.value); setPage(1); }}
-                className="w-full h-9 rounded-xl border border-neutral-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            {hasFilters && (
-              <Button variant="ghost" size="sm" leftIcon={<X className="h-3.5 w-3.5" />} onClick={clearFilters}>
-                Clear
-              </Button>
             )}
           </div>
-        )}
 
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 flex items-center gap-4">
-            <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />
-            <p className="text-sm text-neutral-700">{error.message}</p>
-            <Button size="sm" variant="outline" leftIcon={<RefreshCw className="h-3 w-3" />} onClick={refetch}>Retry</Button>
+          <div className="relative w-full sm:w-48">
+            <select
+              value={cityId}
+              onChange={(e) => {
+                setCityId(e.target.value);
+                setPage(1);
+              }}
+              className="w-full h-11 px-3 rounded-2xl border border-neutral-200 text-xs font-semibold text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white shadow-sm cursor-pointer"
+            >
+              <option value="">All Destinations</option>
+              {cityListData?.cities.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}, {c.country}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Loading */}
-        {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} variant="rounded" height={280} />
-            ))}
+      {/* Category Pills Bar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => {
+              setCategory(cat);
+              setPage(1);
+            }}
+            className={cn(
+              "px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0",
+              category === cat
+                ? "bg-primary text-white shadow-sm shadow-primary/20"
+                : "bg-white text-neutral-600 border border-neutral-200/80 hover:bg-neutral-50"
+            )}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Loading Skeletons */}
+      {isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      )}
+
+      {/* Error Alert */}
+      {!isLoading && error && (
+        <div className="bg-red-50/90 backdrop-blur-sm border border-red-200/80 rounded-3xl p-8 text-center space-y-4">
+          <AlertCircle className="h-8 w-8 text-red-500 mx-auto" />
+          <div>
+            <h3 className="font-bold text-neutral-900">Failed to load activities</h3>
+            <p className="text-xs text-neutral-600 mt-1">{error.message}</p>
           </div>
-        )}
+          <Button variant="outline" leftIcon={<RefreshCw className="h-4 w-4" />} onClick={refetch}>
+            Try Again
+          </Button>
+        </div>
+      )}
 
-        {/* Empty */}
-        {!isLoading && !error && actData?.activities.length === 0 && (
+      {/* Empty State */}
+      {!isLoading && !error && activities.length === 0 && (
+        <div className="bg-white/85 backdrop-blur-xl rounded-3xl border border-neutral-200/60 p-10 sm:p-14 shadow-sm text-center">
           <EmptyState
             variant="activities"
             title="No activities found"
-            description="Try adjusting your filters or search for a different city."
-            action={hasFilters ? <Button variant="outline" onClick={clearFilters}>Clear Filters</Button> : undefined}
+            description="Try changing your search keywords or switching category filters."
+            action={
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearch("");
+                  setCategory("All");
+                  setCityId("");
+                }}
+              >
+                Reset Filters
+              </Button>
+            }
           />
-        )}
+        </div>
+      )}
 
-        {/* Count */}
-        {!isLoading && actData && actData.activities.length > 0 && (
-          <p className="text-sm text-neutral-500">
-            {actData.pagination.total} activit{actData.pagination.total === 1 ? "y" : "ies"} found
-          </p>
-        )}
-
-        {/* Grid */}
-        {!isLoading && actData && actData.activities.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {actData.activities.map((act) => (
-              <ActivityCard
+      {/* Activities Grid */}
+      {!isLoading && !error && activities.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activities.map((act) => (
+              <DiscoverActivityCard
                 key={act.id}
                 activity={act}
-                onAdd={(a) => { setAddTarget(a); setAddOpen(true); }}
+                onAdd={(a) => setAddModalAct(a)}
               />
             ))}
           </div>
-        )}
 
-        {/* Pagination */}
-        {!isLoading && actData && actData.pagination.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              leftIcon={<ChevronLeft className="h-4 w-4" />}
-              disabled={!actData.pagination.hasPrev}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              Prev
-            </Button>
-            <span className="text-sm text-neutral-500">
-              Page {actData.pagination.page} of {actData.pagination.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              rightIcon={<ChevronRight className="h-4 w-4" />}
-              disabled={!actData.pagination.hasNext}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </Button>
-          </div>
-        )}
-      </div>
+          {/* Pagination Bar */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 pt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<ChevronLeft className="h-4 w-4" />}
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Previous
+              </Button>
+              <span className="text-xs font-semibold text-neutral-600 bg-white px-3 py-1.5 rounded-xl border border-neutral-200 shadow-sm">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                rightIcon={<ChevronRight className="h-4 w-4" />}
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </>
+      )}
 
+      {/* Add To Itinerary Modal */}
       <AddToItineraryModal
-        activity={addTarget}
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
+        activity={addModalAct}
+        open={Boolean(addModalAct)}
+        onClose={() => setAddModalAct(null)}
       />
-    </PageShell>
+    </div>
   );
 }
 
+/* ── Main Activity Page Wrapper with Suspense ── */
 export default function DiscoverActivitiesPage() {
+  const { user } = useAuth();
+
   return (
-    <Suspense fallback={null}>
-      <DiscoverActivitiesContent />
-    </Suspense>
+    <PageShell currentPath="/discover" userName={user?.name ?? undefined}>
+      <Suspense fallback={<CardSkeleton />}>
+        <DiscoverActivitiesContent />
+      </Suspense>
+    </PageShell>
   );
 }

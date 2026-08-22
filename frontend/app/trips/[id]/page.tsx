@@ -15,25 +15,51 @@ import { useApiData } from "@/lib/hooks/useApiData";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api/client";
 import {
-  getTrip, updateTrip, deleteTrip, getTripCities, addCityToTrip,
-  removeCityFromTrip, reorderTripCities, type Trip, type TripCity,
+  getTrip,
+  updateTrip,
+  deleteTrip,
+  getTripCities,
+  addCityToTrip,
+  removeCityFromTrip,
+  reorderTripCities,
+  type Trip,
+  type TripCity,
 } from "@/lib/api/trips";
 import { searchCities, type City } from "@/lib/api/cities";
 import {
-  CalendarDays, MapPin, DollarSign, Pencil, Trash2, Plus, Search,
-  GripVertical, X, ExternalLink, Users, ArrowRight, AlertCircle, RefreshCw,
-  Plane, Map,
+  CalendarDays,
+  MapPin,
+  DollarSign,
+  Pencil,
+  Trash2,
+  Plus,
+  Search,
+  ChevronUp,
+  ChevronDown,
+  X,
+  ExternalLink,
+  Users,
+  ArrowRight,
+  AlertCircle,
+  RefreshCw,
+  Plane,
+  Clock,
+  Wallet,
+  Compass,
+  Sparkles,
 } from "lucide-react";
 
 /* ── helpers ── */
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
+
 function currencySymbol(c: string) {
   return c === "INR" ? "₹" : c === "USD" ? "$" : c === "EUR" ? "€" : c;
 }
+
 function getDays(s: string, e: string) {
-  return Math.max(1, Math.ceil((new Date(e).getTime() - new Date(s).getTime()) / 86400000));
+  return Math.max(1, Math.ceil((new Date(e).getTime() - new Date(s).getTime()) / 86400000) + 1);
 }
 
 /* ── City Search Row ── */
@@ -57,13 +83,19 @@ function CitySearchPanel({
   const [addError, setAddError] = useState("");
 
   const doSearch = useCallback(async (q: string) => {
-    if (!q.trim()) { setResults([]); return; }
+    if (!q.trim()) {
+      setResults([]);
+      return;
+    }
     setSearching(true);
     try {
       const cities = await searchCities(q);
       setResults(cities);
-    } catch { setResults([]); }
-    finally { setSearching(false); }
+    } catch {
+      setResults([]);
+    } finally {
+      setSearching(false);
+    }
   }, []);
 
   async function handleAdd(city: City) {
@@ -76,43 +108,53 @@ function CitySearchPanel({
       onAdded();
     } catch (err) {
       setAddError(err instanceof ApiError ? err.message : "Could not add city.");
-    } finally { setAdding(null); }
+    } finally {
+      setAdding(null);
+    }
   }
 
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
           <input
             type="text"
-            placeholder="Search cities to add…"
+            placeholder="Search cities to add destination stop (e.g. Paris, Tokyo, Goa)…"
             value={query}
-            onChange={(e) => { setQuery(e.target.value); doSearch(e.target.value); }}
-            className="w-full h-10 pl-10 pr-4 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            onChange={(e) => {
+              setQuery(e.target.value);
+              doSearch(e.target.value);
+            }}
+            className="w-full h-11 pl-10 pr-4 rounded-2xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white shadow-sm"
           />
         </div>
       </div>
-      {addError && <p className="text-xs text-red-600">{addError}</p>}
+      {addError && <p className="text-xs text-red-600 font-medium px-1">{addError}</p>}
       {(searching || results.length > 0) && (
-        <div className="rounded-xl border border-neutral-100 bg-white shadow-lg divide-y divide-neutral-50 max-h-64 overflow-y-auto">
-          {searching && <p className="text-sm text-neutral-400 p-3">Searching…</p>}
+        <div className="rounded-2xl border border-neutral-200/80 bg-white/95 backdrop-blur-md shadow-xl divide-y divide-neutral-100 max-h-64 overflow-y-auto z-20">
+          {searching && <p className="text-sm text-neutral-400 p-4">Searching destinations…</p>}
           {results.map((city) => {
             const already = existingCityIds.includes(city.id);
             return (
-              <div key={city.id} className="flex items-center justify-between px-4 py-3 hover:bg-neutral-50">
-                <div>
-                  <p className="text-sm font-medium text-neutral-900">{city.name}</p>
-                  <p className="text-xs text-neutral-500">{city.country}</p>
+              <div key={city.id} className="flex items-center justify-between px-4 py-3 hover:bg-neutral-50/80 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                    <MapPin className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-neutral-900">{city.name}</p>
+                    <p className="text-xs text-neutral-500 font-medium">{city.country}</p>
+                  </div>
                 </div>
                 <Button
                   size="sm"
-                  variant={already ? "ghost" : "outline"}
+                  variant={already ? "ghost" : "primary"}
                   disabled={already || adding === city.id}
                   loading={adding === city.id}
                   onClick={() => handleAdd(city)}
                 >
-                  {already ? "Added" : "Add"}
+                  {already ? "Added" : "Add Stop"}
                 </Button>
               </div>
             );
@@ -141,80 +183,102 @@ function CitiesList({
 }) {
   const [removing, setRemoving] = useState<string | null>(null);
   const [reordering, setReordering] = useState(false);
-  const [localCities, setLocalCities] = useState<TripCity[]>(cities);
-
-  React.useEffect(() => setLocalCities(cities), [cities]);
 
   async function handleRemove(cityId: string) {
     setRemoving(cityId);
     try {
       await removeCityFromTrip(tripId, cityId);
       onRefresh();
-    } catch { /* error surfaced on refresh */ }
-    finally { setRemoving(null); }
+    } catch {
+      /* noop */
+    } finally {
+      setRemoving(null);
+    }
   }
 
-  async function moveCity(idx: number, dir: -1 | 1) {
-    const next = [...localCities];
+  async function handleMove(idx: number, dir: -1 | 1) {
+    const next = [...cities];
     const target = idx + dir;
     if (target < 0 || target >= next.length) return;
-    [next[idx], next[target]] = [next[target], next[idx]];
-    setLocalCities(next);
+    const [moved] = next.splice(idx, 1);
+    next.splice(target, 0, moved);
     setReordering(true);
     try {
-      await reorderTripCities(tripId, next.map((c) => c.city.id));
+      await reorderTripCities(
+        tripId,
+        next.map((c) => c.city.id)
+      );
       onRefresh();
-    } catch { setLocalCities(cities); }
-    finally { setReordering(false); }
+    } catch {
+      /* noop */
+    } finally {
+      setReordering(false);
+    }
   }
 
-  if (localCities.length === 0) {
+  if (cities.length === 0) {
     return (
-      <EmptyState
-        variant="activities"
-        title="No cities yet"
-        description="Search for cities and add them to build your route."
-      />
+      <div className="bg-neutral-50/80 rounded-2xl p-6 text-center border border-dashed border-neutral-200 text-neutral-500 text-sm">
+        No destination cities added yet. Use the search bar above to add your first stop.
+      </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {localCities.map((tc, idx) => (
+    <div className="space-y-3">
+      {cities.map((tc, idx) => (
         <div
           key={tc.id}
-          className="flex items-center gap-3 bg-white rounded-xl border border-neutral-100 px-4 py-3 shadow-sm"
+          className="flex items-center justify-between gap-3 p-4 bg-white/90 backdrop-blur-sm rounded-2xl border border-neutral-200/70 shadow-sm hover:shadow-md transition-all group"
         >
-          {canEdit && (
-            <div className="flex flex-col gap-0.5 text-neutral-300 shrink-0">
-              <button
-                onClick={() => moveCity(idx, -1)}
-                disabled={idx === 0 || reordering}
-                className="hover:text-primary disabled:opacity-30 transition-colors text-xs leading-none"
-              >▲</button>
-              <button
-                onClick={() => moveCity(idx, 1)}
-                disabled={idx === localCities.length - 1 || reordering}
-                className="hover:text-primary disabled:opacity-30 transition-colors text-xs leading-none"
-              >▼</button>
+          {/* Index & City Name */}
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+              {idx + 1}
             </div>
-          )}
-          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <MapPin className="h-4 w-4 text-primary" />
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-neutral-900 truncate flex items-center gap-1.5">
+                {tc.city.name}
+                <span className="text-xs text-neutral-400 font-normal">({tc.city.country})</span>
+              </p>
+              {tc.arrivalDate && (
+                <p className="text-xs text-neutral-500 flex items-center gap-1 mt-0.5">
+                  <CalendarDays className="h-3 w-3 text-primary" />
+                  {fmtDate(tc.arrivalDate)}
+                  {tc.departureDate ? ` – ${fmtDate(tc.departureDate)}` : ""}
+                </p>
+              )}
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-neutral-900">{tc.city.name}</p>
-            <p className="text-xs text-neutral-500">{tc.city.country}</p>
-          </div>
-          <div className="text-xs text-neutral-400 hidden sm:block">Stop {idx + 1}</div>
+
+          {/* Reorder & Remove Actions */}
           {canEdit && (
-            <button
-              onClick={() => handleRemove(tc.city.id)}
-              disabled={removing === tc.city.id}
-              className="h-7 w-7 rounded-lg flex items-center justify-center text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => handleMove(idx, -1)}
+                disabled={idx === 0 || reordering}
+                className="h-7 w-7 rounded-lg flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-neutral-100 disabled:opacity-20 transition-colors"
+                title="Move up"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleMove(idx, 1)}
+                disabled={idx === cities.length - 1 || reordering}
+                className="h-7 w-7 rounded-lg flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-neutral-100 disabled:opacity-20 transition-colors"
+                title="Move down"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleRemove(tc.city.id)}
+                disabled={removing === tc.city.id}
+                className="h-7 w-7 rounded-lg flex items-center justify-center text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors ml-1"
+                title="Remove city stop"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           )}
         </div>
       ))}
@@ -224,405 +288,372 @@ function CitiesList({
 
 /* ── Edit Trip Modal ── */
 function EditTripModal({
-  trip,
   open,
   onClose,
+  trip,
   onSaved,
 }: {
-  trip: Trip;
   open: boolean;
   onClose: () => void;
+  trip: Trip;
   onSaved: () => void;
 }) {
   const [name, setName] = useState(trip.name);
   const [description, setDescription] = useState(trip.description ?? "");
-  const [startDate, setStartDate] = useState(trip.startDate.split("T")[0]);
-  const [endDate, setEndDate] = useState(trip.endDate.split("T")[0]);
   const [budget, setBudget] = useState(String(trip.budget));
-  const [currency, setCurrency] = useState(trip.currency);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSave() {
-    setSaving(true);
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
     setError("");
+    setSaving(true);
     try {
       await updateTrip(trip.id, {
         name: name.trim(),
         description: description.trim() || undefined,
-        startDate,
-        endDate,
-        budget: parseFloat(budget) || 0,
-        currency,
+        budget: Number(budget) || 0,
       });
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to save.");
-    } finally { setSaving(false); }
+      setError(err instanceof ApiError ? err.message : "Failed to update trip.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Edit Trip" size="lg"
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button variant="primary" onClick={handleSave} loading={saving}>Save Changes</Button>
-        </>
-      }
-    >
-      <div className="space-y-4">
-        <Input id="edit-name" label="Trip Name" value={name} onChange={(e) => setName(e.target.value)} />
-        <div>
-          <label className="text-sm font-medium text-neutral-700 block mb-1.5">Description</label>
+    <Modal open={open} onClose={onClose} title="Edit Trip Details" size="md">
+      <form onSubmit={handleSave} className="space-y-4">
+        {error && <p className="text-xs text-red-600 bg-red-50 p-3 rounded-xl">{error}</p>}
+        <Input
+          id="trip-name"
+          label="Trip Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-medium text-neutral-700">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={2}
-            className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+            rows={3}
+            className="w-full rounded-xl border border-neutral-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            placeholder="Trip notes or summary…"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Input id="edit-start" label="Start Date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          <Input id="edit-end" label="End Date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <Input
+          id="trip-budget"
+          label="Total Budget"
+          type="number"
+          min="0"
+          value={budget}
+          onChange={(e) => setBudget(e.target.value)}
+        />
+        <div className="flex justify-end gap-3 pt-2">
+          <Button variant="ghost" type="button" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" loading={saving}>
+            Save Changes
+          </Button>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Input id="edit-budget" label="Budget" type="number" value={budget} onChange={(e) => setBudget(e.target.value)} />
-          <div>
-            <label className="text-sm font-medium text-neutral-700 block mb-1.5">Currency</label>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full h-10 rounded-xl border border-neutral-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20">
-              {["INR","USD","EUR","GBP","JPY","AUD"].map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-        </div>
-        {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2">{error}</p>}
-      </div>
+      </form>
     </Modal>
   );
 }
 
-/* ── Main Page ── */
-type Tab = "overview" | "cities" | "itinerary";
-
+/* ── Main Trip Detail Page ── */
 export default function TripDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
+  const tripId = params.id;
   const router = useRouter();
   const { user } = useAuth();
-  const [tab, setTab] = useState<Tab>("overview");
+
+  const { data: trip, isLoading, error, refetch } = useApiData<Trip>(() => getTrip(tripId), [tripId]);
+  const { data: citiesData, refetch: refetchCities } = useApiData<TripCity[]>(
+    () => getTripCities(tripId),
+    [tripId]
+  );
+
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [addCityOpen, setAddCityOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
-  const {
-    data: trip,
-    isLoading: tripLoading,
-    error: tripError,
-    refetch: refetchTrip,
-  } = useApiData<Trip>(() => getTrip(id), [id]);
-
-  const {
-    data: cities,
-    isLoading: citiesLoading,
-    refetch: refetchCities,
-  } = useApiData<TripCity[]>(() => getTripCities(id), [id]);
-
-  const isOwner = user?.id === trip?.userId;
-  const canEdit = isOwner || trip?.tripMembers?.some(
-    (m) => m.user?.id === user?.id && (m.role === "OWNER" || m.role === "EDITOR")
-  );
+  const canEdit = Boolean(trip);
+  const cities = citiesData ?? trip?.tripCities ?? [];
+  const existingCityIds = cities.map((c) => c.city.id);
+  const coverImg =
+    cities[0]?.city?.image ||
+    "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&auto=format&fit=crop&q=80";
+  const duration = trip ? getDays(trip.startDate, trip.endDate) : 0;
+  const sym = trip ? currencySymbol(trip.currency) : "₹";
 
   async function handleDelete() {
+    if (!trip) return;
     setDeleting(true);
+    setDeleteError("");
     try {
-      await deleteTrip(id);
+      await deleteTrip(trip.id);
       router.push("/trips");
-    } catch { setDeleting(false); }
+    } catch (err) {
+      setDeleteError(err instanceof ApiError ? err.message : "Failed to delete trip.");
+      setDeleting(false);
+    }
   }
-
-  /* ── Loading ── */
-  if (tripLoading) {
-    return (
-      <PageShell currentPath="/trips">
-        <div className="max-w-5xl mx-auto pt-6 pb-32 space-y-6">
-          <Skeleton variant="text" width="40%" height={36} />
-          <Skeleton variant="text" width="60%" height={20} />
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            <Skeleton variant="rounded" height={80} />
-            <Skeleton variant="rounded" height={80} />
-            <Skeleton variant="rounded" height={80} />
-          </div>
-        </div>
-      </PageShell>
-    );
-  }
-
-  /* ── Error ── */
-  if (tripError || !trip) {
-    return (
-      <PageShell currentPath="/trips">
-        <div className="max-w-5xl mx-auto pt-6 pb-32">
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center space-y-4">
-            <AlertCircle className="h-8 w-8 text-red-500 mx-auto" />
-            <p className="text-neutral-700">{tripError?.message ?? "Trip not found."}</p>
-            <Button variant="outline" leftIcon={<RefreshCw className="h-4 w-4" />} onClick={refetchTrip}>Retry</Button>
-          </div>
-        </div>
-      </PageShell>
-    );
-  }
-
-  const days = getDays(trip.startDate, trip.endDate);
-  const sym = currencySymbol(trip.currency);
-  const tripCities = cities ?? [];
 
   return (
-    <PageShell currentPath="/trips">
-      <div className="max-w-5xl mx-auto pt-2 md:pt-6 pb-32 space-y-6">
+    <PageShell currentPath="/trips" userName={user?.name ?? undefined}>
+      <div className="max-w-6xl mx-auto space-y-8 pb-32 pt-2 md:pt-4">
+        {/* Loading Skeleton */}
+        {isLoading && (
+          <div className="space-y-6">
+            <Skeleton variant="rounded" height={260} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Skeleton variant="rounded" height={300} className="lg:col-span-2" />
+              <Skeleton variant="rounded" height={300} />
+            </div>
+          </div>
+        )}
 
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-neutral-500">
-          <Link href="/trips" className="hover:text-primary transition-colors">My Trips</Link>
-          <span>/</span>
-          <span className="text-neutral-900 font-medium truncate max-w-[200px]">{trip.name}</span>
-        </nav>
+        {/* Error Alert */}
+        {!isLoading && error && (
+          <div className="bg-red-50/90 backdrop-blur-sm border border-red-200/80 rounded-3xl p-8 text-center space-y-4">
+            <AlertCircle className="h-8 w-8 text-red-500 mx-auto" />
+            <div>
+              <h3 className="font-bold text-neutral-900">Trip not found</h3>
+              <p className="text-xs text-neutral-600 mt-1">{error.message}</p>
+            </div>
+            <div className="flex justify-center gap-3">
+              <Button variant="outline" leftIcon={<RefreshCw className="h-4 w-4" />} onClick={refetch}>
+                Retry
+              </Button>
+              <Button variant="primary" onClick={() => router.push("/trips")}>
+                Back to Trips
+              </Button>
+            </div>
+          </div>
+        )}
 
-        {/* Hero Card */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-neutral-200/60 shadow-lg overflow-hidden">
-          {/* Cover */}
-          <div className="relative h-40 md:h-56">
-            <img
-              src={tripCities[0]?.city?.image ?? "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&auto=format&fit=crop&q=80"}
-              alt={trip.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-            <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-display font-bold text-white drop-shadow-md">{trip.name}</h1>
-                {trip.description && (
-                  <p className="text-white/80 text-sm mt-1 line-clamp-1">{trip.description}</p>
-                )}
-              </div>
-              {canEdit && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setEditOpen(true)}
-                    className="h-9 w-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  {isOwner && (
-                    <button
-                      onClick={() => setDeleteOpen(true)}
-                      className="h-9 w-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-500/60 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+        {/* Loaded View */}
+        {!isLoading && !error && trip && (
+          <>
+            {/* Hero Banner */}
+            <div className="relative rounded-3xl overflow-hidden shadow-lg border border-neutral-200/60 group">
+              <div className="relative h-64 sm:h-80 overflow-hidden">
+                <img
+                  src={coverImg}
+                  alt={trip.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/40 to-transparent" />
+
+                {/* Top Action Bar */}
+                <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                  <Badge variant="primary" size="sm" dot>
+                    {duration} Days Adventure
+                  </Badge>
+                  {canEdit && (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        leftIcon={<Pencil className="h-3.5 w-3.5" />}
+                        onClick={() => setEditOpen(true)}
+                        className="bg-white/90 backdrop-blur-md shadow-sm"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        leftIcon={<Trash2 className="h-3.5 w-3.5" />}
+                        onClick={() => setDeleteOpen(true)}
+                        className="shadow-sm"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-neutral-100 border-t border-neutral-100">
-            {[
-              { icon: <CalendarDays className="h-4 w-4 text-primary" />, label: "Dates", value: `${fmtDate(trip.startDate)} – ${fmtDate(trip.endDate)}` },
-              { icon: <Plane className="h-4 w-4 text-accent" />, label: "Duration", value: `${days} day${days !== 1 ? "s" : ""}` },
-              { icon: <MapPin className="h-4 w-4 text-info" />, label: "Cities", value: `${tripCities.length}` },
-              { icon: <DollarSign className="h-4 w-4 text-success" />, label: "Budget", value: `${sym}${trip.budget.toLocaleString()}` },
-            ].map((s, i) => (
-              <div key={i} className="flex flex-col items-center gap-1 py-4 px-3">
-                {s.icon}
-                <p className="text-xs text-neutral-500">{s.label}</p>
-                <p className="text-sm font-semibold text-neutral-900 text-center">{s.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-1 bg-white/60 backdrop-blur-sm rounded-2xl border border-neutral-100 p-1 shadow-sm w-fit">
-          {(["overview", "cities", "itinerary"] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={cn(
-                "px-5 py-2 rounded-xl text-sm font-medium capitalize transition-all duration-200",
-                tab === t
-                  ? "bg-white text-primary shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-800"
-              )}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-
-        {/* Overview Tab */}
-        {tab === "overview" && (
-          <div className="grid sm:grid-cols-2 gap-5">
-            {/* Route preview */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-neutral-100 shadow-sm p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-neutral-900 flex items-center gap-2">
-                  <Map className="h-4 w-4 text-primary" /> Route
-                </h3>
-                <button onClick={() => setTab("cities")} className="text-xs text-primary hover:underline">Edit</button>
-              </div>
-              {tripCities.length === 0 ? (
-                <p className="text-sm text-neutral-400">No cities added yet.</p>
-              ) : (
-                <div className="flex flex-wrap gap-1">
-                  {tripCities.map((tc, i) => (
-                    <React.Fragment key={tc.id}>
-                      <Badge variant="info" size="sm">{tc.city.name}</Badge>
-                      {i < tripCities.length - 1 && <ArrowRight className="h-3 w-3 text-neutral-300 self-center" />}
-                    </React.Fragment>
-                  ))}
+                {/* Bottom Details */}
+                <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
+                  <h1 className="text-2xl sm:text-4xl font-display font-bold leading-tight drop-shadow-sm">
+                    {trip.name}
+                  </h1>
+                  {trip.description && (
+                    <p className="text-sm sm:text-base text-white/90 max-w-2xl line-clamp-2 leading-relaxed">
+                      {trip.description}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-1 text-xs sm:text-sm text-white/80 font-medium">
+                    <span className="flex items-center gap-1.5">
+                      <CalendarDays className="h-4 w-4 text-primary-300" />
+                      {fmtDate(trip.startDate)} – {fmtDate(trip.endDate)}
+                    </span>
+                    {trip.budget > 0 && (
+                      <span className="flex items-center gap-1.5">
+                        <Wallet className="h-4 w-4 text-secondary-300" />
+                        {sym}
+                        {trip.budget.toLocaleString()}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4 text-accent-300" />
+                      {cities.length} {cities.length === 1 ? "Stop" : "Stops"}
+                    </span>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Team */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-neutral-100 shadow-sm p-5 space-y-3">
-              <h3 className="font-semibold text-neutral-900 flex items-center gap-2">
-                <Users className="h-4 w-4 text-accent" /> Team
-              </h3>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-                    {trip.user?.name?.[0] ?? "?"}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-neutral-900">{trip.user?.name}</p>
-                    <p className="text-xs text-neutral-500">{trip.user?.email}</p>
-                  </div>
-                  <Badge variant="primary" size="sm">Owner</Badge>
-                </div>
-                {trip.tripMembers?.filter((m) => m.user?.id !== trip.userId).map((m) => (
-                  <div key={m.id} className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold text-accent">
-                      {m.user?.name?.[0] ?? "?"}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-neutral-900">{m.user?.name}</p>
-                    </div>
-                    <Badge variant="default" size="sm">{m.role}</Badge>
-                  </div>
-                ))}
               </div>
             </div>
 
-            {/* Quick links */}
-            <div className="sm:col-span-2 flex flex-wrap gap-3">
-              <Button
-                variant="outline"
-                leftIcon={<CalendarDays className="h-4 w-4" />}
-                onClick={() => router.push(`/trips/${id}/itinerary`)}
+            {/* Quick Navigation Tabs */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
+              <Link
+                href={`/trips/${trip.id}`}
+                className="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-sm shrink-0"
               >
-                View Itinerary
-              </Button>
-              <Button
-                variant="outline"
-                leftIcon={<DollarSign className="h-4 w-4" />}
-                onClick={() => router.push(`/trips/${id}/budget`)}
+                Overview & Stops
+              </Link>
+              <Link
+                href={`/trips/${trip.id}/itinerary`}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100 bg-white border border-neutral-200/80 shadow-sm shrink-0 flex items-center gap-1.5"
               >
+                <Clock className="h-4 w-4 text-primary" />
+                Day-by-Day Itinerary
+              </Link>
+              <Link
+                href={`/trips/${trip.id}/budget`}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100 bg-white border border-neutral-200/80 shadow-sm shrink-0 flex items-center gap-1.5"
+              >
+                <Wallet className="h-4 w-4 text-secondary-600" />
                 Budget & Expenses
-              </Button>
-              <Button
-                variant="outline"
-                leftIcon={<ExternalLink className="h-4 w-4" />}
-                onClick={() => router.push(`/discover/activities`)}
-              >
-                Discover Activities
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Cities Tab */}
-        {tab === "cities" && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-neutral-100 shadow-sm p-6 space-y-5">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-neutral-900">Trip Route</h3>
-              {canEdit && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  leftIcon={<Plus className="h-3.5 w-3.5" />}
-                  onClick={() => setAddCityOpen(!addCityOpen)}
-                >
-                  Add City
-                </Button>
-              )}
+              </Link>
             </div>
 
-            {addCityOpen && canEdit && (
-              <CitySearchPanel
-                tripId={id}
-                existingCityIds={tripCities.map((tc) => tc.city.id)}
-                tripStart={trip.startDate}
-                tripEnd={trip.endDate}
-                onAdded={() => { refetchCities(); setAddCityOpen(false); }}
-              />
-            )}
+            {/* 2-Column Content Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column: Route Stops Management */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl border border-neutral-200/60 p-6 sm:p-8 shadow-sm space-y-6">
+                  <div>
+                    <h2 className="text-xl font-display font-bold text-neutral-900">Destination Stops</h2>
+                    <p className="text-xs text-neutral-500 mt-1">
+                      Build your multi-city travel itinerary. Reorder stops to organize your travel route.
+                    </p>
+                  </div>
 
-            {citiesLoading ? (
-              <div className="space-y-2">
-                <Skeleton variant="rounded" height={56} />
-                <Skeleton variant="rounded" height={56} />
+                  {/* Add City Search */}
+                  {canEdit && (
+                    <CitySearchPanel
+                      tripId={trip.id}
+                      existingCityIds={existingCityIds}
+                      tripStart={trip.startDate}
+                      tripEnd={trip.endDate}
+                      onAdded={() => {
+                        refetchCities();
+                        refetch();
+                      }}
+                    />
+                  )}
+
+                  {/* Stops List */}
+                  <CitiesList
+                    tripId={trip.id}
+                    tripStart={trip.startDate}
+                    tripEnd={trip.endDate}
+                    cities={cities}
+                    onRefresh={() => {
+                      refetchCities();
+                      refetch();
+                    }}
+                    canEdit={canEdit}
+                  />
+                </div>
               </div>
-            ) : (
-              <CitiesList
-                tripId={id}
-                tripStart={trip.startDate}
-                tripEnd={trip.endDate}
-                cities={tripCities}
-                onRefresh={refetchCities}
-                canEdit={!!canEdit}
-              />
-            )}
-          </div>
-        )}
 
-        {/* Itinerary Tab (redirect to full page) */}
-        {tab === "itinerary" && (
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-neutral-100 shadow-sm p-8 text-center space-y-4">
-            <CalendarDays className="h-10 w-10 text-primary mx-auto" />
-            <h3 className="font-semibold text-neutral-900 text-lg">Day-wise Itinerary</h3>
-            <p className="text-sm text-neutral-500 max-w-sm mx-auto">
-              Plan your activities day by day, add cost estimates, and reorder items on the full itinerary page.
-            </p>
-            <Button
-              variant="primary"
-              rightIcon={<ArrowRight className="h-4 w-4" />}
-              onClick={() => router.push(`/trips/${id}/itinerary`)}
-            >
-              Open Itinerary
-            </Button>
-          </div>
+              {/* Right Column: Quick Action Cards */}
+              <div className="space-y-6">
+                {/* Itinerary CTA Card */}
+                <div className="bg-gradient-to-br from-primary-50 to-white rounded-3xl border border-primary/20 p-6 shadow-sm space-y-4">
+                  <div className="h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md shadow-primary/25">
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-neutral-900 text-base">Schedule Activities</h3>
+                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
+                      Plan Day 1, Day 2, and beyond. Add sights, food tours, and excursions.
+                    </p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    fullWidth
+                    rightIcon={<ArrowRight className="h-4 w-4" />}
+                    onClick={() => router.push(`/trips/${trip.id}/itinerary`)}
+                  >
+                    Open Itinerary
+                  </Button>
+                </div>
+
+                {/* Budget CTA Card */}
+                <div className="bg-gradient-to-br from-secondary-50 to-white rounded-3xl border border-secondary/20 p-6 shadow-sm space-y-4">
+                  <div className="h-10 w-10 rounded-2xl bg-secondary-600 text-white flex items-center justify-center shadow-md shadow-secondary/25">
+                    <Wallet className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-neutral-900 text-base">Budget & Optimizer</h3>
+                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
+                      Track expenses across categories and discover smart cost-saving alternatives.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    fullWidth
+                    rightIcon={<ArrowRight className="h-4 w-4" />}
+                    onClick={() => router.push(`/trips/${trip.id}/budget`)}
+                  >
+                    Manage Budget
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
-      {/* Modals */}
-      <EditTripModal
-        trip={trip}
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        onSaved={refetchTrip}
-      />
-      <ConfirmModal
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
-        title="Delete Trip"
-        message={`Delete "${trip.name}"? This cannot be undone.`}
-        confirmLabel="Delete"
-        variant="danger"
-        loading={deleting}
-      />
+      {/* Edit Trip Modal */}
+      {trip && (
+        <EditTripModal
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          trip={trip}
+          onSaved={refetch}
+        />
+      )}
+
+      {/* Delete Trip Confirm Modal */}
+      {trip && (
+        <ConfirmModal
+          open={deleteOpen}
+          title={`Delete "${trip.name}"?`}
+          message="Are you sure you want to delete this trip? All linked itinerary items, destinations, and logged expenses will be permanently removed."
+          confirmLabel="Delete Trip"
+          cancelLabel="Cancel"
+          variant="danger"
+          loading={deleting}
+          onConfirm={handleDelete}
+          onClose={() => {
+            setDeleteOpen(false);
+            setDeleteError("");
+          }}
+        />
+      )}
     </PageShell>
   );
 }
