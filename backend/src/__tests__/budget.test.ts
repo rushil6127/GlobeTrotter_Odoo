@@ -7,6 +7,7 @@ import {
   tripBudgetParamSchema,
   EXPENSE_CATEGORIES,
 } from '../validators/budget.validator.js';
+import { SEED_CITIES } from '../config/seedData.js';
 
 describe('Budget & Expense Validator Schemas', () => {
   it('should validate createExpenseSchema with valid inputs and normalize category', async () => {
@@ -149,5 +150,100 @@ describe('Budget Calculation Logic', () => {
     assert.strictEqual(overBudget, true);
     assert.strictEqual(overBudgetAmount, 100);
     assert.strictEqual(remaining, -100);
+  });
+});
+
+describe('Smart Budget Optimizer Suggestions Logic', () => {
+  it('should suggest cheaper alternatives in same category and calculate potential savings', () => {
+    const tripBudget = 40000;
+    const currentSpent = 45000;
+    const overBudgetAmount = currentSpent - tripBudget; // 5000 over budget
+
+    const mockScheduledItems = [
+      {
+        id: 'item-1',
+        title: 'VIP Scuba Diving Experience',
+        category: 'Adventure',
+        cost: 4500,
+        cityId: 'city-goa',
+      },
+      {
+        id: 'item-2',
+        title: 'Helicopter City Flight',
+        category: 'Sightseeing',
+        cost: 8000,
+        cityId: 'city-goa',
+      },
+    ];
+
+    const mockAvailableActivities = [
+      {
+        id: 'act-cheaper-1',
+        name: 'Standard Snorkeling Tour',
+        category: 'Adventure',
+        estimatedCost: 1500,
+        cityId: 'city-goa',
+      },
+      {
+        id: 'act-cheaper-2',
+        name: 'Mandovi River Sunset Cruise',
+        category: 'Sightseeing',
+        estimatedCost: 600,
+        cityId: 'city-goa',
+      },
+      {
+        id: 'act-free-1',
+        name: 'Anjuna Beach Sunset Walk',
+        category: 'Sightseeing',
+        estimatedCost: 0,
+        cityId: 'city-goa',
+      },
+    ];
+
+    const suggestions: Array<{
+      itineraryItemId: string;
+      currentCost: number;
+      alternativeCost: number;
+      potentialSavings: number;
+    }> = [];
+
+    for (const item of mockScheduledItems) {
+      const cheaper = mockAvailableActivities.filter(
+        (a) => a.category === item.category && a.estimatedCost < item.cost
+      );
+
+      for (const alt of cheaper) {
+        suggestions.push({
+          itineraryItemId: item.id,
+          currentCost: item.cost,
+          alternativeCost: alt.estimatedCost,
+          potentialSavings: item.cost - alt.estimatedCost,
+        });
+      }
+    }
+
+    assert.strictEqual(suggestions.length, 3);
+    assert.strictEqual(suggestions[0].potentialSavings, 3000); // 4500 - 1500 (Adventure)
+    assert.strictEqual(suggestions[1].potentialSavings, 7400); // 8000 - 600 (Sightseeing Alt 1)
+    assert.strictEqual(suggestions[2].potentialSavings, 8000); // 8000 - 0 (Sightseeing Alt 2 Free)
+
+    // Best savings per item: item-1 = 3000, item-2 = 8000
+    const maxSavingsPerItem = new Map<string, number>();
+    for (const s of suggestions) {
+      const existing = maxSavingsPerItem.get(s.itineraryItemId) || 0;
+      if (s.potentialSavings > existing) {
+        maxSavingsPerItem.set(s.itineraryItemId, s.potentialSavings);
+      }
+    }
+
+    let totalPotentialSavings = 0;
+    for (const savings of maxSavingsPerItem.values()) {
+      totalPotentialSavings += savings;
+    }
+    assert.strictEqual(totalPotentialSavings, 11000); // 3000 + 8000
+
+    const projectedSpent = currentSpent - totalPotentialSavings;
+    assert.strictEqual(projectedSpent, 34000);
+    assert.strictEqual(projectedSpent <= tripBudget, true); // Over-budget resolved!
   });
 });
