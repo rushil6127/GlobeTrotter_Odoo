@@ -97,6 +97,8 @@ model Activity {
 
   @@index([cityId])
   @@index([category])
+  @@index([estimatedCost])
+  @@index([cityId, category])
 }
 
 model ItineraryItem {

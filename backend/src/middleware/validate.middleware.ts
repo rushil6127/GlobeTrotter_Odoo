@@ -21,7 +21,7 @@ export const validateBody = (schema: ZodSchema) => {
   };
 };
 
-export const validateQuery = (schema: AnyZodObject) => {
+export const validateQuery = (schema: ZodSchema) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       req.query = (await schema.parseAsync(req.query)) as any;
@@ -40,7 +40,7 @@ export const validateQuery = (schema: AnyZodObject) => {
   };
 };
 
-export const validateParams = (schema: AnyZodObject) => {
+export const validateParams = (schema: ZodSchema) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       req.params = (await schema.parseAsync(req.params)) as any;
