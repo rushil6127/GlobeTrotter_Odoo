@@ -3,11 +3,16 @@
 import React from "react";
 import { Navbar, MobileNav } from "@/components/navigation/Navbar";
 import { Sidebar } from "@/components/navigation/Sidebar";
+import { useAuth } from "@/context/AuthContext";
 
 /* ───────── Types ───────── */
 
 export interface PageShellProps {
   currentPath: string;
+  /**
+   * @deprecated Pass userName only when you need to override the name from AuthContext.
+   * Prefer the auth-aware default which reads the real user name.
+   */
   userName?: string;
   children: React.ReactNode;
 }
@@ -16,9 +21,13 @@ export interface PageShellProps {
 
 export function PageShell({
   currentPath,
-  userName = "Traveler",
+  userName,
   children,
 }: PageShellProps) {
+  const { user } = useAuth();
+  // Fall back chain: explicit override → real user name → generic label
+  const displayName = userName ?? user?.name ?? "Traveler";
+
   return (
     <div className="flex h-screen overflow-hidden relative">
       {/* Blurred Background Image */}
@@ -36,7 +45,7 @@ export function PageShell({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
         {/* Navbar */}
-        <Navbar currentPath={currentPath} userName={userName} />
+        <Navbar currentPath={currentPath} userName={displayName} />
 
         {/* Scrollable Container */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12">
