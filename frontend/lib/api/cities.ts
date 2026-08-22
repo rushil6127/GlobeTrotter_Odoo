@@ -2,7 +2,7 @@
  * GlobeTrotter — Cities & Activities API Module
  *
  * Public endpoints — no auth required for discovery.
- * Contract from: backend/FRONTEND_INTEGRATION.md §3.5 & §3.6
+ * Contract from: backend/FRONTEND_INTEGRATION.md §3.4 & §3.5
  */
 
 import { apiGet } from "@/lib/api/client";
@@ -17,9 +17,9 @@ export interface City {
   country: string;
   description?: string | null;
   image?: string | null;
-  priceLevel?: number | null;
   latitude?: number | null;
   longitude?: number | null;
+  _count?: { activities?: number };
 }
 
 export interface CityListResponse {
@@ -29,6 +29,8 @@ export interface CityListResponse {
     limit: number;
     total: number;
     totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
   };
 }
 
@@ -38,12 +40,12 @@ export interface CityListResponse {
 
 export interface Activity {
   id: string;
+  cityId: string;
   name: string;
   category: string;
   duration?: number | null;
   estimatedCost?: number | null;
   image?: string | null;
-  rating?: number | null;
   description?: string | null;
   city: Pick<City, "id" | "name" | "country">;
 }
@@ -55,6 +57,8 @@ export interface ActivityListResponse {
     limit: number;
     total: number;
     totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
   };
 }
 
@@ -63,29 +67,35 @@ export interface ActivityListResponse {
 // ─────────────────────────────────────────────
 
 /** GET /api/cities — Paginated city list */
-export function getCities(params?: {
+export async function getCities(params?: {
   page?: number;
   limit?: number;
   country?: string;
-  search?: string;
 }): Promise<CityListResponse> {
   const qs = new URLSearchParams();
   if (params?.page) qs.set("page", String(params.page));
   if (params?.limit) qs.set("limit", String(params.limit));
   if (params?.country) qs.set("country", params.country);
-  if (params?.search) qs.set("search", params.search);
   const query = qs.toString();
   return apiGet<CityListResponse>(`/cities${query ? `?${query}` : ""}`);
 }
 
 /** GET /api/cities/search?q= — Quick city search */
-export function searchCities(q: string): Promise<City[]> {
-  return apiGet<City[]>(`/cities/search?q=${encodeURIComponent(q)}`);
+export async function searchCities(q: string): Promise<City[]> {
+  const res = await apiGet<{ query: string; count: number; cities: City[] }>(
+    `/cities/search?q=${encodeURIComponent(q)}`
+  );
+  return res.cities;
 }
 
-/** GET /api/cities/:cityId — Single city details */
-export function getCity(cityId: string): Promise<City> {
-  return apiGet<City>(`/cities/${cityId}`);
+/** GET /api/cities/:cityId — Single city with activities */
+export async function getCity(
+  cityId: string
+): Promise<City & { activities?: Activity[] }> {
+  const res = await apiGet<{ city: City & { activities?: Activity[] } }>(
+    `/cities/${cityId}`
+  );
+  return res.city;
 }
 
 // ─────────────────────────────────────────────
@@ -93,26 +103,31 @@ export function getCity(cityId: string): Promise<City> {
 // ─────────────────────────────────────────────
 
 /** GET /api/activities — Filtered activity list */
-export function getActivities(params?: {
+export async function getActivities(params?: {
   cityId?: string;
   category?: string;
   maxCost?: number;
-  search?: string;
+  maxDuration?: number;
   page?: number;
   limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }): Promise<ActivityListResponse> {
   const qs = new URLSearchParams();
   if (params?.cityId) qs.set("cityId", params.cityId);
   if (params?.category) qs.set("category", params.category);
   if (params?.maxCost !== undefined) qs.set("maxCost", String(params.maxCost));
-  if (params?.search) qs.set("search", params.search);
+  if (params?.maxDuration !== undefined) qs.set("maxDuration", String(params.maxDuration));
   if (params?.page) qs.set("page", String(params.page));
   if (params?.limit) qs.set("limit", String(params.limit));
+  if (params?.sortBy) qs.set("sortBy", params.sortBy);
+  if (params?.sortOrder) qs.set("sortOrder", params.sortOrder);
   const query = qs.toString();
   return apiGet<ActivityListResponse>(`/activities${query ? `?${query}` : ""}`);
 }
 
 /** GET /api/activities/:activityId — Activity details */
-export function getActivity(activityId: string): Promise<Activity> {
-  return apiGet<Activity>(`/activities/${activityId}`);
+export async function getActivity(activityId: string): Promise<Activity> {
+  const res = await apiGet<{ activity: Activity }>(`/activities/${activityId}`);
+  return res.activity;
 }
