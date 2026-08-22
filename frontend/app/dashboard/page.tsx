@@ -27,7 +27,6 @@ import {
   RefreshCw,
   Wallet,
   Globe2,
-  TrendingUp,
 } from "lucide-react";
 
 /* ───────── Quick-action data ───────── */
@@ -61,13 +60,6 @@ const quickActions: QuickAction[] = [
     href: "/discover/activities",
     icon: <Sparkles className="h-5 w-5" />,
     gradient: "from-secondary to-secondary-600",
-  },
-  {
-    label: "View Calendar",
-    description: "See your schedule",
-    href: "/calendar",
-    icon: <CalendarDays className="h-5 w-5" />,
-    gradient: "from-info to-sky-600",
   },
   {
     label: "My Trips",
@@ -354,7 +346,7 @@ function QuickActionsGrid() {
         <span className="text-xs text-neutral-400 font-medium">Fast shortcuts</span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {quickActions.map((action) => (
           <div
             key={action.href}

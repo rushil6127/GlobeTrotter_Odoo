@@ -10,8 +10,6 @@ import {
   Compass,
   CalendarDays,
   User,
-  Bell,
-  Search,
   LogOut,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -25,6 +23,7 @@ export interface NavItem {
   icon: React.ReactNode;
   active?: boolean;
   badge?: number;
+  comingSoon?: boolean;
 }
 
 export interface NavbarProps {
@@ -42,14 +41,13 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: "My Trips", href: "/trips", icon: <Map className="h-5 w-5" /> },
   { label: "Discover", href: "/discover", icon: <Compass className="h-5 w-5" /> },
-  { label: "Calendar", href: "/calendar", icon: <CalendarDays className="h-5 w-5" /> },
 ];
 
 /* ───────── Logo ───────── */
 
 export function Logo({ collapsed }: { collapsed?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2.5 group">
+    <Link href="/dashboard" className="flex items-center gap-2.5 group">
       <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
         <Globe className="h-5 w-5 text-white" />
       </div>
@@ -68,11 +66,11 @@ export function Navbar({
   currentPath = "/dashboard",
   userName = "Traveler",
   userAvatar,
-  notificationCount = 0,
   onSearch,
   className,
 }: NavbarProps) {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const displayName = userName ?? user?.name ?? "Traveler";
 
   return (
     <header
@@ -81,16 +79,16 @@ export function Navbar({
         className
       )}
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 sm:gap-8">
         {/* Logo */}
         <Logo />
 
         {/* Navigation links */}
         <nav className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
-            const isActive = currentPath === item.href;
+            const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
             return (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
@@ -103,49 +101,27 @@ export function Navbar({
               >
                 {item.icon}
                 {item.label}
-              </a>
+              </Link>
             );
           })}
         </nav>
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={onSearch}
-            className="h-10 w-10 rounded-xl flex items-center justify-center text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50 transition-colors"
-            aria-label="Search"
-          >
-            <Search className="h-5 w-5" />
-          </button>
-
-          <button
-            className="relative h-10 w-10 rounded-xl flex items-center justify-center text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50 transition-colors"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            {notificationCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
-                {notificationCount > 9 ? "9+" : notificationCount}
-              </span>
-            )}
-          </button>
-
           <div className="h-6 w-px bg-neutral-200 mx-1 hidden md:block" />
 
-          <a
-            href="/profile"
-            className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl hover:bg-neutral-50 transition-colors"
-          >
+          {/* User avatar — shows real name, no /profile link since not built */}
+          <div className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl">
             <Avatar
               src={userAvatar}
-              name={userName}
+              name={displayName}
               size="sm"
               status="online"
             />
             <span className="hidden lg:block text-sm font-medium text-neutral-700">
-              {userName}
+              {displayName}
             </span>
-          </a>
+          </div>
 
           <button
             onClick={() => { void logout(); }}
@@ -170,10 +146,8 @@ export function MobileNav({
   currentPath?: string;
   className?: string;
 }) {
-  const mobileItems = [
-    ...navItems,
-    { label: "Profile", href: "/profile", icon: <User className="h-5 w-5" /> },
-  ];
+  // Mobile nav only shows the 3 built pages — no calendar/profile link on mobile
+  const mobileItems = [...navItems];
 
   return (
     <nav
@@ -186,9 +160,9 @@ export function MobileNav({
     >
       <div className="flex items-center justify-around h-16 px-2">
         {mobileItems.map((item) => {
-          const isActive = currentPath === item.href;
+          const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
           return (
-            <a
+            <Link
               key={item.href}
               href={item.href}
               className={cn(
@@ -204,7 +178,7 @@ export function MobileNav({
               {isActive && (
                 <span className="absolute top-0 h-0.5 w-6 bg-primary rounded-full" />
               )}
-            </a>
+            </Link>
           );
         })}
       </div>

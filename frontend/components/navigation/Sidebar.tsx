@@ -8,10 +8,10 @@ import {
   Compass,
   CalendarDays,
   User,
-  Settings,
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Lock,
 } from "lucide-react";
 import { Logo } from "./Navbar";
 import { useAuth } from "@/context/AuthContext";
@@ -22,6 +22,7 @@ interface SidebarItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  comingSoon?: boolean;
 }
 
 export interface SidebarProps {
@@ -37,12 +38,11 @@ const mainItems: SidebarItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: "My Trips", href: "/trips", icon: <Map className="h-5 w-5" /> },
   { label: "Discover", href: "/discover", icon: <Compass className="h-5 w-5" /> },
-  { label: "Calendar", href: "/calendar", icon: <CalendarDays className="h-5 w-5" /> },
+  { label: "Calendar", href: "/calendar", icon: <CalendarDays className="h-5 w-5" />, comingSoon: true },
 ];
 
 const bottomItems: SidebarItem[] = [
-  { label: "Profile", href: "/profile", icon: <User className="h-5 w-5" /> },
-  { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
+  { label: "Profile", href: "/profile", icon: <User className="h-5 w-5" />, comingSoon: true },
 ];
 
 /* ───────── Component ───────── */
@@ -72,7 +72,31 @@ export function Sidebar({
       {/* Main nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {mainItems.map((item) => {
-          const isActive = currentPath === item.href;
+          const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
+          if (item.comingSoon) {
+            return (
+              <div
+                key={item.href}
+                title={collapsed ? `${item.label} (Coming Soon)` : undefined}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm",
+                  "cursor-not-allowed opacity-50 select-none",
+                  collapsed && "justify-center px-2",
+                  "text-neutral-400"
+                )}
+              >
+                <span className="shrink-0">{item.icon}</span>
+                {!collapsed && (
+                  <span className="flex-1 flex items-center justify-between">
+                    {item.label}
+                    <span className="text-[9px] font-bold uppercase tracking-wide bg-neutral-100 text-neutral-400 px-1.5 py-0.5 rounded-md">
+                      Soon
+                    </span>
+                  </span>
+                )}
+              </div>
+            );
+          }
           return (
             <a
               key={item.href}
@@ -98,6 +122,30 @@ export function Sidebar({
       <div className="px-3 py-4 space-y-1 border-t border-neutral-100">
         {bottomItems.map((item) => {
           const isActive = currentPath === item.href;
+          if (item.comingSoon) {
+            return (
+              <div
+                key={item.href}
+                title={collapsed ? `${item.label} (Coming Soon)` : undefined}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm",
+                  "cursor-not-allowed opacity-50 select-none",
+                  collapsed && "justify-center px-2",
+                  "text-neutral-400"
+                )}
+              >
+                <span className="shrink-0">{item.icon}</span>
+                {!collapsed && (
+                  <span className="flex-1 flex items-center justify-between">
+                    {item.label}
+                    <span className="text-[9px] font-bold uppercase tracking-wide bg-neutral-100 text-neutral-400 px-1.5 py-0.5 rounded-md">
+                      Soon
+                    </span>
+                  </span>
+                )}
+              </div>
+            );
+          }
           return (
             <a
               key={item.href}
