@@ -120,6 +120,11 @@ model ItineraryItem {
 
   trip     Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
   activity Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+
+  @@index([tripId])
+  @@index([tripId, date])
+  @@index([tripId, dayNumber])
+  @@index([activityId])
 }
 
 model Expense {
