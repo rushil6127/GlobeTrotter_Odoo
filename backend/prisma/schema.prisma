@@ -78,6 +78,8 @@ model TripCity {
   city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
   @@unique([tripId, cityId])
+  @@index([tripId, order])
+  @@index([cityId])
 }
 
 model Activity {
