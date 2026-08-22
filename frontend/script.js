@@ -325,7 +325,9 @@
 
           if (formState) formState.style.display = "none";
           if (successState) successState.style.display = "flex";
-          // TODO(team): redirect to dashboard once frontend routing exists — do not invent a dashboard route.
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 1200);
         } else {
           const errorMessage = (result && result.message) || (isSignUpMode ? "Registration failed. Please check your information." : "Authentication failed. Please check your credentials.");
           if (passwordError) {
