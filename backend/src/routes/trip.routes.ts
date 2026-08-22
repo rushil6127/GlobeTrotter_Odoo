@@ -2,8 +2,9 @@ import { Router } from 'express';
 import { TripController } from '../controllers/trip.controller.js';
 import { TripCityController } from '../controllers/tripCity.controller.js';
 import { ItineraryController } from '../controllers/itinerary.controller.js';
+import { BudgetController } from '../controllers/budget.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
-import { validateBody, validateQuery } from '../middleware/validate.middleware.js';
+import { validateBody, validateQuery, validateParams } from '../middleware/validate.middleware.js';
 import { createTripSchema, updateTripSchema } from '../validators/trip.validator.js';
 import { addCityToTripSchema, reorderTripCitiesSchema } from '../validators/tripCity.validator.js';
 import {
@@ -11,6 +12,10 @@ import {
   reorderItinerarySchema,
   getTripItineraryQuerySchema,
 } from '../validators/itinerary.validator.js';
+import {
+  createExpenseSchema,
+  tripBudgetParamSchema,
+} from '../validators/budget.validator.js';
 
 const router = Router();
 
@@ -34,5 +39,9 @@ router.delete('/:tripId/cities/:cityId', TripCityController.removeCityFromTrip);
 router.get('/:tripId/itinerary', validateQuery(getTripItineraryQuerySchema), ItineraryController.getTripItinerary);
 router.post('/:tripId/itinerary', validateBody(createItineraryItemSchema), ItineraryController.createItineraryItem);
 router.put('/:tripId/itinerary/reorder', validateBody(reorderItinerarySchema), ItineraryController.reorderItineraryItems);
+
+// Trip Budget & Expense routes
+router.get('/:tripId/budget', validateParams(tripBudgetParamSchema), BudgetController.getTripBudget);
+router.post('/:tripId/expenses', validateParams(tripBudgetParamSchema), validateBody(createExpenseSchema), BudgetController.createExpense);
 
 export default router;

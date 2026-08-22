@@ -5,6 +5,7 @@ import cityRoutes from './city.routes.js';
 import tripRoutes from './trip.routes.js';
 import activityRoutes from './activity.routes.js';
 import itineraryRoutes from './itinerary.routes.js';
+import expenseRoutes from './expense.routes.js';
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use('/cities', cityRoutes);
 router.use('/trips', tripRoutes);
 router.use('/activities', activityRoutes);
 router.use('/itinerary', itineraryRoutes);
+router.use('/expenses', expenseRoutes);
 
 export default router;
