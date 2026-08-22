@@ -168,4 +168,7 @@ model ShareLink {
   updatedAt DateTime  @updatedAt
 
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@index([shareKey])
 }

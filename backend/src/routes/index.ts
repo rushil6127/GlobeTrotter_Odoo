@@ -6,6 +6,7 @@ import tripRoutes from './trip.routes.js';
 import activityRoutes from './activity.routes.js';
 import itineraryRoutes from './itinerary.routes.js';
 import expenseRoutes from './expense.routes.js';
+import sharedRoutes from './shared.routes.js';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/trips', tripRoutes);
 router.use('/activities', activityRoutes);
 router.use('/itinerary', itineraryRoutes);
 router.use('/expenses', expenseRoutes);
+router.use('/shared', sharedRoutes);
 
 export default router;
