@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Globe Trotter</title>
+  <meta name="description" content="A cinematic three-screen scroll story for Mostar city." />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="script.js" defer></script>
+</head>
+
+<body>
+  <main class="site-shell">
+    <section class="cinema-scroll" id="cinema" aria-label="Mostar cinematic scroll story">
+      <div class="stage">
+        <div class="world">
+          <img class="scene-img sky-img"
+            src="https://raft-blast-61784561.figma.site/_assets/v11/16b5007d9c93971e26ffe4e0e3e37946f6bd538c.png"
+            alt="" />
+
+          <header class="site-header" aria-label="Primary navigation">
+            <a class="site-logo" href="#cinema">Nirma University</a>
+            <nav class="site-nav" aria-label="Main menu">
+              <a href="#cinema">Intro</a>
+              <a href="#bridge">Bridge</a>
+              <a href="#bazaar">Bazaar</a>
+              <a href="#routes">Routes</a>
+            </nav>
+            <button class="language-switcher" aria-label="Change language">
+              <span>EN</span>
+              <span aria-hidden="true">⌄</span>
+            </button>
+          </header>
+
+          <div class="back-stack">
+            <img class="scene-img back-img back-four"
+              src="https://raft-blast-61784561.figma.site/_assets/v11/8a7f8af50e0ce92ec2e228e7b0b4112178c51cf1.png"
+              alt="" />
+
+            <img class="scene-img back-img back-bazaar"
+              src="https://raft-blast-61784561.figma.site/_assets/v11/864afe00e41e2fa20a5aa546e15cb807e0f81384.png"
+              alt="" />
+          </div>
+          <h1 class="hero-title">Globe Trotter</h1>
+
+          <img class="scene-img splitframe-img splitframe-left"
+            src="https://raft-blast-61784561.figma.site/_assets/v11/7536d7b60a1fce482cf6edf3f0bffd3bad5d0f8a.png"
+            alt="" />
+          <img class="scene-img splitframe-img splitframe-right"
+            src="https://raft-blast-61784561.figma.site/_assets/v11/392db6a6a6b98e868bd7f8d3f55bb719d51e5028.png"
+            alt="" />
+          <img class="scene-img bridge-img"
+            src="https://raft-blast-61784561.figma.site/_assets/v11/c6a6d8ef49bca43f708aa852692942c45ec950d4.png"
+            alt="" />
+          <img class="scene-img frame-two-img"
+            src="https://raft-blast-61784561.figma.site/_assets/v11/ba75252bab2b1c510987b74837770f7bc8a6b2d4.png"
+            alt="" />
+
+          <div class="shade"></div>
+        </div>
+
+        <section class="intro-copy" aria-label="Mostar overview">
+          <p>Experience the energy of vibrant cities, from bustling streets and iconic landmarks to local markets,
+            shopping, nightlife, and delicious cuisine. Discover the unique culture and modern charm that make every
+            city worth exploring.</p>
+          <div class="hero-tags" aria-label="Mostar highlights">
+            <span>Old Bridge</span>
+            <span>Neretva River</span>
+            <span>UNESCO old city</span>
+          </div>
+        </section>
+
+        <section class="story-panel story-panel-bridge" aria-label="Old Bridge details">
+          <h2>Explore Cities full of stories</h2>
+          <p>Go beyond the usual tourist spots and experience the city through its people, culture, and hidden gems.</p>
+          <dl class="facts">
+            <div>
+              <dt>50K+</dt>
+              <dd>Travel Community</dd>
+            </div>
+            <div>
+              <dt>2,500+</dt>
+              <dd>Memorable Journeys </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="story-panel story-panel-bazaar" aria-label="Old town details">
+          <h2>Experience vibrant cities, local culture.</h2>
+          <p>Stone lanes, mosque courtyards, copper stalls, and riverside coffee stay within a short walk of Stari Most.
+          </p>
+          <button class="note-button">
+            <span aria-hidden="true">↗</span>
+            <span>Explore Now</span>
+          </button>
+        </section>
+
+        <!-- Glassmorphism Login Container (Appears overlaying the stage when scroll is complete) -->
+        <div class="login-overlay-container" id="login-panel" style="display: none; opacity: 0; pointer-events: none;">
+          <div class="glass-login-card">
+            <!-- success state (initially hidden) -->
+            <div class="login-success-state" id="success-state" style="display: none;">
+              <svg class="success-icon animate-bounce" viewBox="0 0 24 24" width="56" height="56" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M22 4 12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <h2 class="success-title">Welcome Back!</h2>
+              <p class="success-desc">
+                Your journey awaits. Preparing the dashboard to plan your next memorable trip...
+              </p>
+              <div class="success-loader-line"></div>
+            </div>
+
+            <!-- form state -->
+            <div id="form-state">
+              <div class="login-header">
+                <div class="logo-badge">
+                  <svg class="logo-badge-icon" viewBox="0 0 24 24" width="22" height="22" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="m12 3-1.912 5.886L4 10l5.886 1.912L12 21l1.912-5.886L20 12l-5.886-1.912Z"
+                      stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <h2 id="auth-title">Sign In</h2>
+                <p id="auth-subtitle">Connect and customize your global itineraries</p>
+              </div>
+
+              <form class="login-form" id="login-form" novalidate>
+                <div class="form-group" id="name-group" style="display: none;">
+                  <label for="name">Full Name</label>
+                  <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round" />
+                      <circle cx="12" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <input type="text" id="name" placeholder="John Doe" />
+                  </div>
+                  <span class="error-text" id="name-error"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect width="20" height="16" x="2" y="4" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                    <input type="email" id="email" placeholder="name@example.com" required />
+                  </div>
+                  <span class="error-text" id="email-error"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <path
+                        d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <input type="password" id="password" placeholder="••••••••" required />
+                  </div>
+                  <span class="error-text" id="password-error"></span>
+                </div>
+
+                <div class="login-actions" id="login-actions">
+                  <div class="remember-me">
+                    <input type="checkbox" id="remember" />
+                    <label for="remember">Remember me</label>
+                  </div>
+                  <a href="#forgot" class="forgot-link">Forgot?</a>
+                </div>
+
+                <button type="submit" class="btn-login-submit" id="btn-login-submit">
+                  <span id="btn-text">Sign In to Globe Trotter</span>
+                  <svg class="animate-spin" id="btn-spinner" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                    stroke="currentColor" stroke-width="2" style="display: none; margin-left: 8px;">
+                    <circle cx="12" cy="12" r="10" stroke="rgba(253,241,225,0.2)" />
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+
+                <div class="auth-toggle-footer">
+                  <span id="toggle-prompt">Don't have an account?</span>
+                  <button type="button" class="btn-toggle-auth" id="btn-toggle-auth">Create Account</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+
+</html>
