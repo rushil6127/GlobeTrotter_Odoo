@@ -49,6 +49,12 @@ export interface Trip {
   userId: string;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
   tripCities?: TripCity[];
   tripMembers?: TripMember[];
   _count?: {
