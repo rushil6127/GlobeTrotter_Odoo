@@ -1,7 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config/index.js';
+import { swaggerDocument } from './config/swagger.js';
 import apiRouter from './routes/index.js';
 import { sendError, sendSuccess } from './utils/response.js';
 
@@ -18,6 +20,13 @@ export const createApp = () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
+
+  // Swagger Documentation UI
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.get('/api/docs.json', (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerDocument);
+  });
 
   // Health check endpoint
   app.get('/health', (req: Request, res: Response) => {
