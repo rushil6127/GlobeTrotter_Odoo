@@ -98,6 +98,12 @@ export class TripService {
     });
   }
 
+  /**
+   * Role Capability Matrix:
+   * - OWNER: Can update trip details.
+   * - EDITOR: Can update trip details.
+   * - VIEWER: Read-only access (forbidden to update).
+   */
   static async updateTrip(tripId: string, userId: string, input: UpdateTripInput) {
     const existingTrip = await prisma.trip.findUnique({
       where: { id: tripId },
@@ -168,6 +174,12 @@ export class TripService {
     });
   }
 
+  /**
+   * Role Capability Matrix:
+   * - OWNER (currentUser.id === trip.userId): Can delete trip.
+   * - EDITOR: Cannot delete trip (forbidden).
+   * - VIEWER: Cannot delete trip (forbidden).
+   */
   static async deleteTrip(tripId: string, userId: string) {
     const existingTrip = await prisma.trip.findUnique({
       where: { id: tripId },
