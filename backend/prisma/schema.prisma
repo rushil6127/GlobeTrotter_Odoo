@@ -44,6 +44,8 @@ model Trip {
   expenses       Expense[]
   tripMembers    TripMember[]
   shareLinks     ShareLink[]
+
+  @@index([userId])
 }
 
 model City {
@@ -156,6 +158,7 @@ model TripMember {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([tripId, userId])
+  @@index([userId])
 }
 
 model ShareLink {
