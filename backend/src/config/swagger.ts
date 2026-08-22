@@ -268,6 +268,26 @@ export const swaggerDocument = {
           },
         },
       },
+      TripMember: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid', example: 'tm-1000-0000-0000-0000-000000000001' },
+          tripId: { type: 'string', format: 'uuid', example: 'e8d6411d-5b32-47d0-994c-8a1924619d0a' },
+          userId: { type: 'string', format: 'uuid', example: 'u2000-0000-0000-0000-000000000002' },
+          role: { type: 'string', enum: ['OWNER', 'EDITOR', 'VIEWER'], example: 'EDITOR' },
+          createdAt: { type: 'string', format: 'date-time', example: '2026-08-22T05:46:00.000Z' },
+          updatedAt: { type: 'string', format: 'date-time', example: '2026-08-22T05:46:00.000Z' },
+          user: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', format: 'uuid' },
+              name: { type: 'string' },
+              email: { type: 'string' },
+              avatar: { type: 'string', nullable: true },
+            },
+          },
+        },
+      },
     },
   },
   paths: {
@@ -1773,6 +1793,189 @@ export const swaggerDocument = {
             },
           },
           404: { description: 'Shared trip not found or expired', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+        },
+      },
+    },
+    '/trips/{tripId}/members': {
+      get: {
+        tags: ['Trip Collaboration'],
+        summary: 'List all trip collaborators and roles',
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+        parameters: [
+          { name: 'tripId', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: {
+          200: {
+            description: 'Trip members retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/StandardSuccessResponse' },
+                    {
+                      properties: {
+                        data: {
+                          type: 'object',
+                          properties: {
+                            tripId: { type: 'string' },
+                            tripName: { type: 'string' },
+                            owner: { $ref: '#/components/schemas/User' },
+                            members: {
+                              type: 'array',
+                              items: { $ref: '#/components/schemas/TripMember' },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          401: { description: 'Unauthenticated', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+          403: { description: 'Forbidden', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+          404: { description: 'Trip not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+        },
+      },
+      post: {
+        tags: ['Trip Collaboration'],
+        summary: 'Invite a collaborator to a trip by email (OWNER only)',
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+        parameters: [
+          { name: 'tripId', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string', format: 'email', example: 'collaborator@example.com' },
+                  role: { type: 'string', enum: ['EDITOR', 'VIEWER'], default: 'VIEWER', example: 'EDITOR' },
+                },
+                required: ['email'],
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: 'Trip collaborator invited successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/StandardSuccessResponse' },
+                    {
+                      properties: {
+                        data: {
+                          type: 'object',
+                          properties: {
+                            member: { $ref: '#/components/schemas/TripMember' },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          400: { description: 'Invalid invite (e.g. inviting trip owner)', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+          403: { description: 'Forbidden - only trip owner can invite members', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+          404: { description: 'User or trip not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+          409: { description: 'User is already a collaborator on this trip', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+        },
+      },
+    },
+    '/trips/{tripId}/members/{memberId}': {
+      put: {
+        tags: ['Trip Collaboration'],
+        summary: "Update a collaborator's role (OWNER only)",
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+        parameters: [
+          { name: 'tripId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'memberId', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  role: { type: 'string', enum: ['EDITOR', 'VIEWER'], example: 'EDITOR' },
+                },
+                required: ['role'],
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Trip member role updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/StandardSuccessResponse' },
+                    {
+                      properties: {
+                        data: {
+                          type: 'object',
+                          properties: {
+                            member: { $ref: '#/components/schemas/TripMember' },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          400: { description: 'Validation error', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+          403: { description: 'Forbidden - only trip owner can update roles', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+          404: { description: 'Trip or member not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+        },
+      },
+      delete: {
+        tags: ['Trip Collaboration'],
+        summary: 'Remove a collaborator from a trip (OWNER only)',
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
+        parameters: [
+          { name: 'tripId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'memberId', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: {
+          200: {
+            description: 'Trip member removed successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/StandardSuccessResponse' },
+                    {
+                      properties: {
+                        data: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'string' },
+                            tripId: { type: 'string' },
+                            userId: { type: 'string' },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          403: { description: 'Forbidden - only trip owner can remove members', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
+          404: { description: 'Trip or member not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/StandardErrorResponse' } } } },
         },
       },
     },
