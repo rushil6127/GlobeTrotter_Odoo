@@ -576,15 +576,10 @@ export default function TripDetailPage() {
               </Link>
               <Link
                 href={`/trips/${trip.id}/budget`}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-400 bg-white border border-neutral-200/60 shadow-sm shrink-0 flex items-center gap-1.5 opacity-60 pointer-events-none"
-                tabIndex={-1}
-                aria-disabled="true"
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100 bg-white border border-neutral-200/80 shadow-sm shrink-0 flex items-center gap-1.5"
               >
-                <Wallet className="h-4 w-4 text-neutral-400" />
-                Budget
-                <span className="text-[9px] font-bold uppercase tracking-wide bg-neutral-100 text-neutral-400 px-1.5 py-0.5 rounded-md ml-0.5">
-                  Soon
-                </span>
+                <Wallet className="h-4 w-4 text-primary" />
+                Budget &amp; Expenses
               </Link>
             </div>
 

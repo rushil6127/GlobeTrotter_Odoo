@@ -17,13 +17,11 @@ import { getTrips, addCityToTrip, type Trip } from "@/lib/api/trips";
 import { Search, Plus, Check, ChevronLeft, ChevronRight, AlertCircle, RefreshCw, MapPin, X } from "lucide-react";
 
 /* ── Add to Trip modal ── */
-function AddToTripModal({
+function AddToTripForm({
   city,
-  open,
   onClose,
 }: {
   city: City | null;
-  open: boolean;
   onClose: () => void;
 }) {
   const { data: trips, isLoading } = useApiData<Trip[]>(() => getTrips(), []);
@@ -31,14 +29,6 @@ function AddToTripModal({
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (open) {
-      setSelectedTrip("");
-      setAdded(false);
-      setError("");
-    }
-  }, [open]);
 
   async function handleAdd() {
     if (!city || !selectedTrip) return;
@@ -54,81 +44,102 @@ function AddToTripModal({
     }
   }
 
+  if (added) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-4 text-center">
+        <div className="h-12 w-12 rounded-2xl bg-success/15 flex items-center justify-center text-success">
+          <Check className="h-6 w-6" />
+        </div>
+        <div>
+          <p className="text-base font-bold text-neutral-900">{city?.name} added to your route!</p>
+          <p className="text-xs text-neutral-500 mt-1">You can now schedule activities for this destination.</p>
+        </div>
+        <Link href="/trips" className="text-xs text-primary font-semibold hover:underline pt-1">
+          View Your Trips →
+        </Link>
+        <div className="pt-3 w-full flex justify-end">
+          <Button variant="primary" onClick={onClose}>
+            Done
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {isLoading ? (
+        <div className="space-y-2">
+          <CardSkeleton />
+        </div>
+      ) : !trips || trips.length === 0 ? (
+        <div className="text-center py-4 space-y-3">
+          <p className="text-xs text-neutral-500">You don&apos;t have any trips yet. Create one first!</p>
+          <Link href="/trips/new">
+            <Button size="sm" variant="primary">
+              Create a Trip
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-neutral-700">Choose Destination Trip</label>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            {trips.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setSelectedTrip(t.id)}
+                className={cn(
+                  "w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between",
+                  selectedTrip === t.id
+                    ? "bg-primary/10 border-primary font-bold text-primary"
+                    : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <span className="truncate">{t.name}</span>
+                <span className="text-[10px] text-neutral-400 shrink-0 ml-2">
+                  {t.tripCities?.length ?? t._count?.tripCities ?? 0} stops
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
+
+      <div className="flex justify-end gap-2 pt-2 border-t border-neutral-100">
+        <Button variant="ghost" onClick={onClose} disabled={adding}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={handleAdd} loading={adding} disabled={!selectedTrip}>
+          Add Stop
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function AddToTripModal({
+  city,
+  open,
+  onClose,
+}: {
+  city: City | null;
+  open: boolean;
+  onClose: () => void;
+}) {
+  if (!open || !city) return null;
+
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={`Add ${city?.name} to a Trip`}
+      title={`Add ${city.name} to a Trip`}
       size="sm"
-      footer={
-        !added ? (
-          <>
-            <Button variant="ghost" onClick={onClose} disabled={adding}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={handleAdd} loading={adding} disabled={!selectedTrip}>
-              Add Stop
-            </Button>
-          </>
-        ) : (
-          <Button variant="primary" onClick={onClose}>
-            Done
-          </Button>
-        )
-      }
     >
-      {added ? (
-        <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <div className="h-12 w-12 rounded-2xl bg-success/15 flex items-center justify-center text-success">
-            <Check className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-base font-bold text-neutral-900">{city?.name} added to your route!</p>
-            <p className="text-xs text-neutral-500 mt-1">You can now schedule activities for this destination.</p>
-          </div>
-          <Link href="/trips" className="text-xs text-primary font-semibold hover:underline pt-1">
-            View Your Trips →
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="space-y-2">
-              <CardSkeleton />
-            </div>
-          ) : !trips || trips.length === 0 ? (
-            <div className="text-center py-4 space-y-3">
-              <p className="text-sm text-neutral-500">No trips planned yet. Create one first.</p>
-              <Link href="/trips/new">
-                <Button size="sm" variant="primary">
-                  Plan a Trip
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <>
-              <p className="text-xs text-neutral-600 font-medium">Select target adventure:</p>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {trips.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelectedTrip(t.id)}
-                    className={cn(
-                      "w-full text-left px-3.5 py-2.5 rounded-xl border text-sm transition-all",
-                      selectedTrip === t.id
-                        ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
-                        : "border-neutral-200 hover:border-neutral-300 text-neutral-800 bg-white"
-                    )}
-                  >
-                    {t.name}
-                  </button>
-                ))}
-              </div>
-              {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
-            </>
-          )}
-        </div>
-      )}
+      <AddToTripForm city={city} onClose={onClose} />
     </Modal>
   );
 }
