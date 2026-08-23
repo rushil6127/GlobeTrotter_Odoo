@@ -38,7 +38,7 @@ const mainItems: SidebarItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: "My Trips", href: "/trips", icon: <Map className="h-5 w-5" /> },
   { label: "Discover", href: "/discover", icon: <Compass className="h-5 w-5" /> },
-  { label: "Calendar", href: "/calendar", icon: <CalendarDays className="h-5 w-5" />, comingSoon: true },
+  { label: "Calendar", href: "/calendar", icon: <CalendarDays className="h-5 w-5" /> },
 ];
 
 const bottomItems: SidebarItem[] = [

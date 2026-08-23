@@ -38,13 +38,11 @@ import {
 const CATEGORIES = ["All", "Sightseeing", "Food", "Adventure", "Water Sports", "Culture", "Shopping"];
 
 /* ── Add to Itinerary Modal ── */
-function AddToItineraryModal({
+function AddToItineraryForm({
   activity,
-  open,
   onClose,
 }: {
-  activity: Activity | null;
-  open: boolean;
+  activity: Activity;
   onClose: () => void;
 }) {
   const { data: trips, isLoading: tripsLoading } = useApiData<Trip[]>(() => getTrips(), []);
@@ -58,19 +56,7 @@ function AddToItineraryModal({
   const [error, setError] = useState("");
   const [addedTripId, setAddedTripId] = useState("");
 
-  useEffect(() => {
-    if (open) {
-      setSelectedTrip("");
-      setSelectedDay(1);
-      setTotalDays(1);
-      setStartTime("");
-      setEndTime("");
-      setAdded(false);
-      setError("");
-    }
-  }, [open]);
-
-  async function handleTripSelect(tripId: string) {
+  function handleTripSelect(tripId: string) {
     setSelectedTrip(tripId);
     if (!tripId) return;
     try {
@@ -110,123 +96,147 @@ function AddToItineraryModal({
     }
   }
 
+  if (added) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-4 text-center">
+        <div className="h-12 w-12 rounded-2xl bg-success/15 flex items-center justify-center text-success">
+          <Check className="h-6 w-6" />
+        </div>
+        <div>
+          <p className="text-base font-bold text-neutral-900">{activity.name} added to Day {selectedDay}!</p>
+          <p className="text-xs text-neutral-500 mt-1">This activity is now scheduled in your itinerary.</p>
+        </div>
+        <div className="flex gap-3 pt-3">
+          <Button variant="ghost" onClick={onClose}>
+            Close
+          </Button>
+          <Link href={`/trips/${addedTripId}/itinerary`}>
+            <Button variant="primary">View Itinerary</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Add to Itinerary"
-      description={activity?.name}
-      size="md"
-      footer={
-        !added ? (
-          <>
-            <Button variant="ghost" onClick={onClose} disabled={adding}>
-              Cancel
+    <div className="space-y-4">
+      {tripsLoading ? (
+        <div className="space-y-2">
+          <CardSkeleton />
+        </div>
+      ) : !trips || trips.length === 0 ? (
+        <div className="text-center py-4 space-y-3">
+          <p className="text-sm text-neutral-500">No trips yet. Create a trip first.</p>
+          <Link href="/trips/new">
+            <Button size="sm" variant="primary">
+              Create a Trip
             </Button>
-            <Button variant="primary" onClick={handleAdd} loading={adding} disabled={!selectedTrip}>
-              Add to Itinerary
-            </Button>
-          </>
-        ) : (
-          <div className="flex gap-3">
-            <Button variant="ghost" onClick={onClose}>
-              Close
-            </Button>
-            <Link href={`/trips/${addedTripId}/itinerary`}>
-              <Button variant="primary">View Itinerary</Button>
-            </Link>
-          </div>
-        )
-      }
-    >
-      {added ? (
-        <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <div className="h-12 w-12 rounded-2xl bg-success/15 flex items-center justify-center text-success">
-            <Check className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-base font-bold text-neutral-900">{activity?.name} added to Day {selectedDay}!</p>
-            <p className="text-xs text-neutral-500 mt-1">This activity is now scheduled in your itinerary.</p>
-          </div>
+          </Link>
         </div>
       ) : (
-        <div className="space-y-4">
-          {tripsLoading ? (
-            <div className="space-y-2">
-              <CardSkeleton />
-            </div>
-          ) : !trips || trips.length === 0 ? (
-            <div className="text-center py-4 space-y-3">
-              <p className="text-sm text-neutral-500">No trips yet. Create a trip first.</p>
-              <Link href="/trips/new">
-                <Button size="sm" variant="primary">
-                  Create Trip
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-700">Choose Adventure</label>
-                <select
-                  value={selectedTrip}
-                  onChange={(e) => handleTripSelect(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white cursor-pointer"
+        <>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-neutral-700">Select Trip</label>
+            <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+              {trips.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => handleTripSelect(t.id)}
+                  className={cn(
+                    "w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between",
+                    selectedTrip === t.id
+                      ? "bg-primary/10 border-primary font-bold text-primary"
+                      : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                  )}
                 >
-                  <option value="">Select a trip…</option>
-                  {trips.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <span className="truncate">{t.name}</span>
+                  <span className="text-[10px] text-neutral-400 shrink-0 ml-2">
+                    {t.tripCities?.length ?? t._count?.tripCities ?? 0} stops
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-              {selectedTrip && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-700">Select Day</label>
-                  <div className="flex flex-wrap gap-2">
-                    {Array.from({ length: totalDays }).map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setSelectedDay(i + 1)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-xl text-xs font-bold transition-all",
-                          selectedDay === i + 1
-                            ? "bg-primary text-white shadow-sm shadow-primary/20"
-                            : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                        )}
-                      >
-                        Day {i + 1}
-                      </button>
-                    ))}
-                  </div>
+          {selectedTrip && (
+            <div className="space-y-3 pt-1 border-t border-neutral-100">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-700">Choose Day</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {Array.from({ length: totalDays }).map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setSelectedDay(i + 1)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-xl text-xs font-bold transition-all",
+                        selectedDay === i + 1
+                          ? "bg-primary text-white shadow-xs"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      )}
+                    >
+                      Day {i + 1}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  id="act-start"
+                  id="act-start-time"
                   label="Start Time"
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                 />
                 <Input
-                  id="act-end"
+                  id="act-end-time"
                   label="End Time"
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                 />
               </div>
-
-              {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
-            </>
+            </div>
           )}
-        </div>
+        </>
       )}
+
+      {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
+
+      <div className="flex justify-end gap-2 pt-2 border-t border-neutral-100">
+        <Button variant="ghost" onClick={onClose} disabled={adding}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={handleAdd} loading={adding} disabled={!selectedTrip}>
+          Add to Itinerary
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function AddToItineraryModal({
+  activity,
+  open,
+  onClose,
+}: {
+  activity: Activity | null;
+  open: boolean;
+  onClose: () => void;
+}) {
+  if (!open || !activity) return null;
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Add to Itinerary"
+      description={activity.name}
+      size="md"
+    >
+      <AddToItineraryForm activity={activity} onClose={onClose} />
     </Modal>
   );
 }

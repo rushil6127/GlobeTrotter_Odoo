@@ -175,22 +175,20 @@ function ItineraryItemCard({
   );
 }
 
-/* ── Add / Edit Item Modal ── */
-function ItemModal({
-  open,
-  onClose,
+/* ── Add / Edit Item Form ── */
+function ItemForm({
   tripId,
   editItem,
   defaultDayNumber = 1,
   totalDays = 1,
+  onClose,
   onSaved,
 }: {
-  open: boolean;
-  onClose: () => void;
   tripId: string;
   editItem: ItineraryItem | null;
   defaultDayNumber?: number;
   totalDays?: number;
+  onClose: () => void;
   onSaved: () => void;
 }) {
   const [title, setTitle] = useState(editItem?.title ?? "");
@@ -203,25 +201,6 @@ function ItemModal({
   const [notes, setNotes] = useState(editItem?.notes ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
-  // Reset when editItem changes
-  React.useEffect(() => {
-    if (editItem) {
-      setTitle(editItem.title);
-      setDayNumber(editItem.dayNumber);
-      setStartTime(editItem.startTime ?? "");
-      setEndTime(editItem.endTime ?? "");
-      setEstimatedCost(editItem.estimatedCost != null ? String(editItem.estimatedCost) : "");
-      setNotes(editItem.notes ?? "");
-    } else {
-      setTitle("");
-      setDayNumber(defaultDayNumber);
-      setStartTime("");
-      setEndTime("");
-      setEstimatedCost("");
-      setNotes("");
-    }
-  }, [editItem, defaultDayNumber]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -261,86 +240,117 @@ function ItemModal({
   }
 
   return (
+    <form onSubmit={handleSave} className="space-y-4">
+      {error && <p className="text-xs text-red-600 bg-red-50 p-3 rounded-xl">{error}</p>}
+      <Input
+        id="item-title"
+        label="Activity Title"
+        placeholder="e.g. Scuba Diving at Grand Island"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-neutral-700">Select Day</label>
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: totalDays }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setDayNumber(i + 1)}
+              className={cn(
+                "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all",
+                dayNumber === i + 1
+                  ? "bg-primary text-white shadow-sm shadow-primary/20"
+                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+              )}
+            >
+              Day {i + 1}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          id="item-start"
+          label="Start Time"
+          type="time"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+        />
+        <Input
+          id="item-end"
+          label="End Time"
+          type="time"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+        />
+      </div>
+      <Input
+        id="item-cost"
+        label="Estimated Cost (₹)"
+        type="number"
+        min="0"
+        placeholder="e.g. 1500"
+        value={estimatedCost}
+        onChange={(e) => setEstimatedCost(e.target.value)}
+      />
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-neutral-700">Notes &amp; Tips</label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          className="w-full rounded-xl border border-neutral-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          placeholder="Booking confirmation, what to pack, meeting point…"
+        />
+      </div>
+      <div className="flex justify-end gap-3 pt-2">
+        <Button variant="ghost" type="button" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button variant="primary" type="submit" loading={saving}>
+          {editItem ? "Save Changes" : "Schedule Activity"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function ItemModal({
+  open,
+  onClose,
+  tripId,
+  editItem,
+  defaultDayNumber = 1,
+  totalDays = 1,
+  onSaved,
+}: {
+  open: boolean;
+  onClose: () => void;
+  tripId: string;
+  editItem: ItineraryItem | null;
+  defaultDayNumber?: number;
+  totalDays?: number;
+  onSaved: () => void;
+}) {
+  if (!open) return null;
+
+  return (
     <Modal
       open={open}
       onClose={onClose}
       title={editItem ? "Edit Scheduled Item" : "Schedule New Activity"}
       size="md"
     >
-      <form onSubmit={handleSave} className="space-y-4">
-        {error && <p className="text-xs text-red-600 bg-red-50 p-3 rounded-xl">{error}</p>}
-        <Input
-          id="item-title"
-          label="Activity Title"
-          placeholder="e.g. Scuba Diving at Grand Island"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-neutral-700">Select Day</label>
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: totalDays }).map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setDayNumber(i + 1)}
-                className={cn(
-                  "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all",
-                  dayNumber === i + 1
-                    ? "bg-primary text-white shadow-sm shadow-primary/20"
-                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                )}
-              >
-                Day {i + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Input
-            id="item-start"
-            label="Start Time"
-            type="time"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-          />
-          <Input
-            id="item-end"
-            label="End Time"
-            type="time"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-          />
-        </div>
-        <Input
-          id="item-cost"
-          label="Estimated Cost (₹)"
-          type="number"
-          min="0"
-          placeholder="e.g. 1500"
-          value={estimatedCost}
-          onChange={(e) => setEstimatedCost(e.target.value)}
-        />
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-neutral-700">Notes & Tips</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={3}
-            className="w-full rounded-xl border border-neutral-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            placeholder="Booking confirmation, what to pack, meeting point…"
-          />
-        </div>
-        <div className="flex justify-end gap-3 pt-2">
-          <Button variant="ghost" type="button" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" type="submit" loading={saving}>
-            {editItem ? "Save Changes" : "Schedule Activity"}
-          </Button>
-        </div>
-      </form>
+      <ItemForm
+        tripId={tripId}
+        editItem={editItem}
+        defaultDayNumber={defaultDayNumber}
+        totalDays={totalDays}
+        onClose={onClose}
+        onSaved={onSaved}
+      />
     </Modal>
   );
 }
@@ -426,15 +436,10 @@ export default function ItineraryPage() {
           </Link>
           <Link
             href={`/trips/${tripId}/budget`}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-400 bg-white border border-neutral-200/60 shadow-sm shrink-0 flex items-center gap-1.5 opacity-60 pointer-events-none"
-            tabIndex={-1}
-            aria-disabled="true"
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100 bg-white border border-neutral-200/80 shadow-sm shrink-0 flex items-center gap-1.5"
           >
-            <Wallet className="h-4 w-4 text-neutral-400" />
-            Budget
-            <span className="text-[9px] font-bold uppercase tracking-wide bg-neutral-100 text-neutral-400 px-1.5 py-0.5 rounded-md ml-0.5">
-              Soon
-            </span>
+            <Wallet className="h-4 w-4 text-primary" />
+            Budget &amp; Expenses
           </Link>
         </div>
 

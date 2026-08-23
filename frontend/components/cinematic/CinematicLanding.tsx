@@ -67,6 +67,8 @@ export function CinematicLanding({
   };
 
   /* ── Per-frame update loop ── */
+  const updateRef = useRef<() => void>(() => {});
+
   const update = useCallback(() => {
     const state = stateRef.current;
     state.rafPending = false;
@@ -187,7 +189,7 @@ export function CinematicLanding({
       if (smoothScroll > 2500 || initialAuthOpen) {
         loginPanel.style.display = "flex";
         loginPanel.style.pointerEvents = "auto";
-        let op = initialAuthOpen ? 1 : (smoothScroll - 2500) / 200;
+        const op = initialAuthOpen ? 1 : (smoothScroll - 2500) / 200;
         loginPanel.style.opacity = Math.min(Math.max(op, 0), 1).toString();
       } else {
         loginPanel.style.pointerEvents = "none";
@@ -202,16 +204,32 @@ export function CinematicLanding({
       Math.abs(state.mouseX - targetMouseX) > 0.001 ||
       Math.abs(state.mouseY - targetMouseY) > 0.001
     ) {
-      requestTick();
+      if (!stateRef.current.rafPending) {
+        stateRef.current.rafPending = true;
+        requestAnimationFrame(() => updateRef.current());
+      }
     }
   }, [initialAuthOpen]);
+
+  useEffect(() => {
+    updateRef.current = update;
+  }, [update]);
 
   const requestTick = useCallback(() => {
     if (!stateRef.current.rafPending) {
       stateRef.current.rafPending = true;
-      requestAnimationFrame(update);
+      requestAnimationFrame(() => updateRef.current());
     }
-  }, [update]);
+  }, []);
+
+  /* ── Navigation helpers ── */
+  const scrollToSection = (targetY: number) => {
+    window.scrollTo({ top: targetY, behavior: "smooth" });
+  };
+
+  const scrollToAuth = () => {
+    window.scrollTo({ top: 3200, behavior: "smooth" });
+  };
 
   /* ── Event Listeners ── */
   useEffect(() => {
@@ -239,15 +257,6 @@ export function CinematicLanding({
       window.removeEventListener("pointermove", handlePointerMove);
     };
   }, [requestTick, initialAuthOpen]);
-
-  /* ── Navigation helpers ── */
-  const scrollToSection = (targetY: number) => {
-    window.scrollTo({ top: targetY, behavior: "smooth" });
-  };
-
-  const scrollToAuth = () => {
-    window.scrollTo({ top: 3200, behavior: "smooth" });
-  };
 
   /* ── Auth Form Submission ── */
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -287,7 +296,7 @@ export function CinematicLanding({
       setTimeout(() => {
         router.push(redirectTo);
       }, 1200);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
           setFieldErrors({ password: "Invalid email or password. Please check your credentials." });
