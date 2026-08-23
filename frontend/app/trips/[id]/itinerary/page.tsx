@@ -25,6 +25,7 @@ import {
   type ItineraryResponse,
 } from "@/lib/api/itinerary";
 import { getTrip, type Trip } from "@/lib/api/trips";
+import { ShareTripModal } from "@/components/trips/ShareTripModal";
 import {
   Plus,
   Clock,
@@ -41,6 +42,7 @@ import {
   Sparkles,
   ArrowRight,
   Wallet,
+  Share2,
 } from "lucide-react";
 
 /* ── helpers ── */
@@ -372,6 +374,7 @@ export default function ItineraryPage() {
 
   const [selectedDayNum, setSelectedDayNum] = useState<number | "all">("all");
   const [modalOpen, setModalOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [editItem, setEditItem] = useState<ItineraryItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<ItineraryItem | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -453,18 +456,29 @@ export default function ItineraryPage() {
               {totalItems} scheduled activities across {days.length} days
             </p>
           </div>
-          <Button
-            variant="primary"
-            size="lg"
-            leftIcon={<Plus className="h-5 w-5" />}
-            onClick={() => {
-              setEditItem(null);
-              setModalOpen(true);
-            }}
-            className="shadow-md shadow-primary/20 hover:shadow-lg transition-all shrink-0"
-          >
-            Add Activity
-          </Button>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Button
+              variant="outline"
+              size="lg"
+              leftIcon={<Share2 className="h-4 w-4 text-primary" />}
+              onClick={() => setShareOpen(true)}
+              className="bg-white shadow-xs font-bold"
+            >
+              Share
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              leftIcon={<Plus className="h-5 w-5" />}
+              onClick={() => {
+                setEditItem(null);
+                setModalOpen(true);
+              }}
+              className="shadow-md shadow-primary/20 hover:shadow-lg transition-all shrink-0"
+            >
+              Add Activity
+            </Button>
+          </div>
         </div>
 
         {/* Day Selector Tabs */}
@@ -644,6 +658,16 @@ export default function ItineraryPage() {
             setDeleteItem(null);
             setDeleteError("");
           }}
+        />
+      )}
+
+      {/* Share Trip Modal */}
+      {trip && (
+        <ShareTripModal
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          tripId={trip.id}
+          tripName={trip.name}
         />
       )}
     </PageShell>

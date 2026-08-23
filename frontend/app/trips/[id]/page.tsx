@@ -26,6 +26,7 @@ import {
   type TripCity,
 } from "@/lib/api/trips";
 import { searchCities, type City } from "@/lib/api/cities";
+import { ShareTripModal } from "@/components/trips/ShareTripModal";
 import {
   CalendarDays,
   MapPin,
@@ -47,6 +48,7 @@ import {
   Wallet,
   Compass,
   Sparkles,
+  Share2,
 } from "lucide-react";
 
 /* ── helpers ── */
@@ -428,6 +430,7 @@ export default function TripDetailPage() {
 
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
@@ -504,28 +507,39 @@ export default function TripDetailPage() {
                   <Badge variant="primary" size="sm" dot>
                     {duration} Days Adventure
                   </Badge>
-                  {canEdit && (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        leftIcon={<Pencil className="h-3.5 w-3.5" />}
-                        onClick={() => setEditOpen(true)}
-                        className="bg-white/90 backdrop-blur-md shadow-sm"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        leftIcon={<Trash2 className="h-3.5 w-3.5" />}
-                        onClick={() => setDeleteOpen(true)}
-                        className="shadow-sm"
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      leftIcon={<Share2 className="h-3.5 w-3.5 text-primary" />}
+                      onClick={() => setShareOpen(true)}
+                      className="bg-white/90 backdrop-blur-md shadow-sm font-bold"
+                    >
+                      Share
+                    </Button>
+                    {canEdit && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          leftIcon={<Pencil className="h-3.5 w-3.5" />}
+                          onClick={() => setEditOpen(true)}
+                          className="bg-white/90 backdrop-blur-md shadow-sm"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          leftIcon={<Trash2 className="h-3.5 w-3.5" />}
+                          onClick={() => setDeleteOpen(true)}
+                          className="shadow-sm"
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* Bottom Details */}
@@ -705,6 +719,16 @@ export default function TripDetailPage() {
             setDeleteOpen(false);
             setDeleteError("");
           }}
+        />
+      )}
+
+      {/* Share Trip Modal */}
+      {trip && (
+        <ShareTripModal
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          tripId={trip.id}
+          tripName={trip.name}
         />
       )}
     </PageShell>
