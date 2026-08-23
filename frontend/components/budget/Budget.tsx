@@ -4,71 +4,21 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import {
   Wallet,
-  TrendingDown,
   AlertTriangle,
-  Utensils,
-  Car,
-  BedDouble,
-  Ticket,
-  ShoppingBag,
-  MoreHorizontal,
   Trash2,
   Edit,
 } from "lucide-react";
+import {
+  ExpenseCategory,
+  getExpenseCategoryConfig,
+} from "@/lib/categories";
+import { formatCurrency } from "@/lib/formatters";
 
 /* ═════════════════════════════════════════
    EXPENSE CATEGORY BADGE
    ═════════════════════════════════════════ */
 
-export type ExpenseCategory =
-  | "transport"
-  | "food"
-  | "accommodation"
-  | "activities"
-  | "shopping"
-  | "other";
-
-const expenseCategoryConfig: Record<
-  ExpenseCategory,
-  { icon: React.ReactNode; color: string; bgColor: string; label: string }
-> = {
-  transport: {
-    icon: <Car className="h-4 w-4" />,
-    color: "text-sky-600",
-    bgColor: "bg-sky-50",
-    label: "Transport",
-  },
-  food: {
-    icon: <Utensils className="h-4 w-4" />,
-    color: "text-orange-600",
-    bgColor: "bg-orange-50",
-    label: "Food",
-  },
-  accommodation: {
-    icon: <BedDouble className="h-4 w-4" />,
-    color: "text-violet-600",
-    bgColor: "bg-violet-50",
-    label: "Accommodation",
-  },
-  activities: {
-    icon: <Ticket className="h-4 w-4" />,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
-    label: "Activities",
-  },
-  shopping: {
-    icon: <ShoppingBag className="h-4 w-4" />,
-    color: "text-pink-600",
-    bgColor: "bg-pink-50",
-    label: "Shopping",
-  },
-  other: {
-    icon: <Wallet className="h-4 w-4" />,
-    color: "text-neutral-600",
-    bgColor: "bg-neutral-50",
-    label: "Other",
-  },
-};
+export type { ExpenseCategory };
 
 export function ExpenseCategoryBadge({
   category,
@@ -77,17 +27,19 @@ export function ExpenseCategoryBadge({
   category: ExpenseCategory;
   className?: string;
 }) {
-  const config = expenseCategoryConfig[category];
+  const config = getExpenseCategoryConfig(category);
+  const Icon = config.icon;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium",
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border",
         config.bgColor,
         config.color,
+        config.borderColor,
         className
       )}
     >
-      {config.icon}
+      <Icon className="h-3.5 w-3.5" />
       {config.label}
     </span>
   );
@@ -124,10 +76,15 @@ export function BudgetProgressBar({
     <div className={cn("space-y-1.5", className)}>
       {showLabels && (
         <div className="flex justify-between text-xs text-neutral-500">
-          <span>
-            {currency}{spent.toLocaleString()} of {currency}{total.toLocaleString()}
+          <span className="truncate">
+            {formatCurrency(spent, currency)} of {formatCurrency(total, currency)}
           </span>
-          <span className={cn("font-semibold", isOver ? "text-error" : isWarning ? "text-amber-600" : "text-primary")}>
+          <span
+            className={cn(
+              "font-semibold shrink-0 ml-2",
+              isOver ? "text-error" : isWarning ? "text-amber-600" : "text-primary"
+            )}
+          >
             {percentage}%
           </span>
         </div>
@@ -174,18 +131,26 @@ export function ExpenseRow({
   onDelete,
   className,
 }: ExpenseRowProps) {
-  const config = expenseCategoryConfig[category];
+  const config = getExpenseCategoryConfig(category);
+  const Icon = config.icon;
 
   return (
     <div
       className={cn(
-        "flex items-center gap-4 py-3 px-4 rounded-xl",
-        "hover:bg-neutral-50 transition-colors group",
+        "flex items-center gap-3 sm:gap-4 py-3 px-3 sm:px-4 rounded-xl",
+        "hover:bg-neutral-50/80 transition-colors group",
         className
       )}
     >
-      <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", config.bgColor, config.color)}>
-        {config.icon}
+      <div
+        className={cn(
+          "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border shadow-2xs",
+          config.bgColor,
+          config.color,
+          config.borderColor
+        )}
+      >
+        <Icon className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-neutral-800 truncate">
@@ -193,30 +158,36 @@ export function ExpenseRow({
         </p>
         <p className="text-xs text-neutral-400">{date}</p>
       </div>
-      <div className="text-right">
+      <div className="text-right shrink-0">
         <p className="text-sm font-bold text-neutral-900">
-          {currency}{amount.toLocaleString()}
+          {formatCurrency(amount, currency)}
         </p>
-        <p className="text-[10px] text-neutral-400 uppercase">{config.label}</p>
+        <p className="text-[10px] text-neutral-400 uppercase tracking-wider">
+          {config.label}
+        </p>
       </div>
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {onEdit && (
-          <button
-            onClick={onEdit}
-            className="h-7 w-7 rounded-md flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/5"
-          >
-            <Edit className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {onDelete && (
-          <button
-            onClick={onDelete}
-            className="h-7 w-7 rounded-md flex items-center justify-center text-neutral-400 hover:text-error hover:bg-red-50"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </div>
+      {(onEdit || onDelete) && (
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="h-7 w-7 rounded-md flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/5 transition-colors"
+              aria-label="Edit expense"
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="h-7 w-7 rounded-md flex items-center justify-center text-neutral-400 hover:text-error hover:bg-red-50 transition-colors"
+              aria-label="Delete expense"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -246,20 +217,21 @@ export function BudgetSummaryCard({
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl border border-neutral-100 overflow-hidden",
-        "shadow-sm",
+        "bg-white rounded-2xl border border-neutral-100 overflow-hidden shadow-xs",
         className
       )}
     >
       {/* Header */}
-      <div className="p-6 pb-4">
+      <div className="p-4 sm:p-6 pb-4">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <Wallet className="h-5 w-5 text-primary" />
           </div>
-          <h3 className="font-semibold text-neutral-900">Budget Summary</h3>
+          <h3 className="font-semibold text-neutral-900 text-base">
+            Budget Summary
+          </h3>
           {isOver && (
-            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-error bg-red-50 px-2 py-1 rounded-full">
+            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-error bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
               <AlertTriangle className="h-3 w-3" />
               Over budget
             </span>
@@ -267,21 +239,39 @@ export function BudgetSummaryCard({
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="bg-neutral-50 rounded-xl p-3 text-center">
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">Budget</p>
-            <p className="text-base font-bold text-neutral-900">{currency}{totalBudget.toLocaleString()}</p>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+          <div className="bg-neutral-50 rounded-xl p-2.5 sm:p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-0.5 sm:mb-1">
+              Budget
+            </p>
+            <p className="text-sm sm:text-base font-bold text-neutral-900 truncate">
+              {formatCurrency(totalBudget, currency)}
+            </p>
           </div>
-          <div className="bg-neutral-50 rounded-xl p-3 text-center">
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">Spent</p>
-            <p className="text-base font-bold text-neutral-900">{currency}{spent.toLocaleString()}</p>
+          <div className="bg-neutral-50 rounded-xl p-2.5 sm:p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-0.5 sm:mb-1">
+              Spent
+            </p>
+            <p className="text-sm sm:text-base font-bold text-neutral-900 truncate">
+              {formatCurrency(spent, currency)}
+            </p>
           </div>
-          <div className={cn("rounded-xl p-3 text-center", isOver ? "bg-red-50" : "bg-emerald-50")}>
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">
+          <div
+            className={cn(
+              "rounded-xl p-2.5 sm:p-3 text-center",
+              isOver ? "bg-red-50" : "bg-emerald-50"
+            )}
+          >
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-0.5 sm:mb-1">
               {isOver ? "Over" : "Left"}
             </p>
-            <p className={cn("text-base font-bold", isOver ? "text-error" : "text-emerald-600")}>
-              {currency}{Math.abs(remaining).toLocaleString()}
+            <p
+              className={cn(
+                "text-sm sm:text-base font-bold truncate",
+                isOver ? "text-error" : "text-emerald-600"
+              )}
+            >
+              {formatCurrency(Math.abs(remaining), currency)}
             </p>
           </div>
         </div>
@@ -290,39 +280,53 @@ export function BudgetSummaryCard({
       </div>
 
       {/* Category breakdown */}
-      <div className="border-t border-neutral-100 p-6 pt-4">
-        <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">
-          By Category
-        </h4>
-        <div className="space-y-2.5">
-          {categories.map(({ category, amount }) => {
-            const config = expenseCategoryConfig[category];
-            const pct = spent > 0 ? Math.round((amount / spent) * 100) : 0;
-            return (
-              <div key={category} className="flex items-center gap-3">
-                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", config.bgColor, config.color)}>
-                  {config.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-neutral-700">{config.label}</span>
-                    <span className="text-xs font-semibold text-neutral-900">
-                      {currency}{amount.toLocaleString()}
-                    </span>
+      {categories && categories.length > 0 && (
+        <div className="border-t border-neutral-100 p-4 sm:p-6 pt-4">
+          <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">
+            By Category
+          </h4>
+          <div className="space-y-2.5">
+            {categories.map(({ category, amount }) => {
+              const config = getExpenseCategoryConfig(category);
+              const Icon = config.icon;
+              const pct = spent > 0 ? Math.round((amount / spent) * 100) : 0;
+              return (
+                <div key={category} className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
+                      config.bgColor,
+                      config.color,
+                      config.borderColor
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
                   </div>
-                  <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-full rounded-full", config.bgColor.replace("50", "300"))}
-                      style={{ width: `${pct}%` }}
-                    />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-neutral-700 truncate">
+                        {config.label}
+                      </span>
+                      <span className="text-xs font-semibold text-neutral-900 ml-2">
+                        {formatCurrency(amount, currency)}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        className={cn("h-full rounded-full bg-primary/70 transition-all duration-500")}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
                   </div>
+                  <span className="text-[10px] text-neutral-400 w-8 text-right shrink-0">
+                    {pct}%
+                  </span>
                 </div>
-                <span className="text-[10px] text-neutral-400 w-8 text-right">{pct}%</span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -345,17 +349,29 @@ export function CategoryBreakdown({
   return (
     <div className={cn("space-y-3", className)}>
       {categories.map(({ category, amount }) => {
-        const config = expenseCategoryConfig[category];
+        const config = getExpenseCategoryConfig(category);
+        const Icon = config.icon;
         const pct = total > 0 ? Math.round((amount / total) * 100) : 0;
         return (
           <div key={category} className="flex items-center gap-3">
-            <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", config.bgColor, config.color)}>
-              {config.icon}
+            <div
+              className={cn(
+                "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
+                config.bgColor,
+                config.color,
+                config.borderColor
+              )}
+            >
+              <Icon className="h-4 w-4" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex justify-between text-sm mb-1">
-                <span className="font-medium text-neutral-700">{config.label}</span>
-                <span className="font-semibold text-neutral-900">{currency}{amount.toLocaleString()}</span>
+                <span className="font-medium text-neutral-700 truncate">
+                  {config.label}
+                </span>
+                <span className="font-semibold text-neutral-900 ml-2">
+                  {formatCurrency(amount, currency)}
+                </span>
               </div>
               <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                 <div

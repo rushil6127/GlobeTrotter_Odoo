@@ -2,12 +2,13 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { PageShell } from "@/components/navigation/PlaceholderPage";
+import { PageShell } from "@/components/navigation/PageShell";
 import { TripCard } from "@/components/cards/TripCard";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { mockTrips, getUpcomingTrip } from "@/lib/mockTrips";
 import type { Trip } from "@/lib/mockTrips";
+import { formatCurrency } from "@/lib/formatters";
 import {
   Plus,
   Compass,
@@ -84,7 +85,7 @@ function UpcomingTripBanner({ trip }: { trip: Trip }) {
         href={`/trips/${trip.id}`}
         className={cn(
           "block bg-white/80 backdrop-blur-xl rounded-2xl border-2 border-primary/20",
-          "shadow-sm hover:shadow-lg transition-all duration-300",
+          "shadow-xs hover:shadow-lg transition-all duration-300",
           "overflow-hidden group"
         )}
       >
@@ -110,33 +111,32 @@ function UpcomingTripBanner({ trip }: { trip: Trip }) {
               <h3 className="text-2xl font-bold text-neutral-900 group-hover:text-primary transition-colors">
                 {trip.name}
               </h3>
-              <p className="text-neutral-500 flex items-center gap-1.5 mt-1">
-                <MapPin className="h-4 w-4" />
-                {trip.destination}
+              <p className="text-neutral-500 flex items-center gap-1.5 mt-1 text-sm">
+                <MapPin className="h-4 w-4 text-neutral-400 shrink-0" />
+                <span>{trip.destination}</span>
               </p>
             </div>
 
-            <p className="text-sm text-neutral-600 line-clamp-2">
+            <p className="text-sm text-neutral-600 line-clamp-2 leading-relaxed">
               {trip.description}
             </p>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500">
               <span className="flex items-center gap-1.5">
                 <CalendarDays className="h-4 w-4 text-primary" />
-                {trip.startDate} – {trip.endDate}
+                <span>{trip.startDate} – {trip.endDate}</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4 text-accent" />
-                {trip.durationDays} days
+                <span>{trip.durationDays} days</span>
               </span>
-              <span className="font-semibold text-neutral-700">
-                {trip.currency}
-                {trip.budget.toLocaleString()}
+              <span className="font-semibold text-neutral-800">
+                {formatCurrency(trip.budget, trip.currency)}
               </span>
             </div>
 
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-sm font-medium text-primary group-hover:underline flex items-center gap-1">
+              <span className="text-sm font-semibold text-primary group-hover:underline flex items-center gap-1">
                 View trip details
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </span>
@@ -162,15 +162,15 @@ function QuickActionsGrid() {
             href={action.href}
             className={cn(
               "group flex flex-col items-center gap-3 p-5 rounded-2xl",
-              "bg-white/70 backdrop-blur-sm border border-neutral-100",
-              "shadow-sm hover:shadow-lg transition-all duration-300",
+              "bg-white/70 backdrop-blur-xs border border-neutral-100",
+              "shadow-xs hover:shadow-lg transition-all duration-300",
               "hover:-translate-y-1"
             )}
           >
             <div
               className={cn(
                 "h-12 w-12 rounded-xl bg-gradient-to-br flex items-center justify-center text-white",
-                "shadow-sm group-hover:shadow-md transition-shadow",
+                "shadow-xs group-hover:shadow-md transition-shadow",
                 action.gradient
               )}
             >
@@ -200,7 +200,7 @@ function TripsGrid({ trips }: { trips: Trip[] }) {
         <h2 className="text-xl font-display text-neutral-900">Your Trips</h2>
         <a
           href="/trips"
-          className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+          className="text-sm font-semibold text-primary hover:underline flex items-center gap-1"
         >
           View all
           <ArrowRight className="h-4 w-4" />

@@ -28,18 +28,18 @@ export function CalendarHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between py-4",
+        "flex items-center justify-between py-3 sm:py-4",
         className
       )}
     >
-      <div className="flex items-center gap-3">
-        <h2 className="text-xl font-bold text-neutral-900">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <h2 className="text-lg sm:text-xl font-bold text-neutral-900 font-display">
           {month} {year}
         </h2>
         {onToday && (
           <button
             onClick={onToday}
-            className="px-3 py-1 rounded-lg text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
+            className="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
           >
             Today
           </button>
@@ -49,12 +49,14 @@ export function CalendarHeader({
         <button
           onClick={onPrev}
           className="h-8 w-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
+          aria-label="Previous month"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
         <button
           onClick={onNext}
           className="h-8 w-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
+          aria-label="Next month"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -93,13 +95,13 @@ export function CalendarEvent({
   return (
     <div
       className={cn(
-        "px-2 py-1 rounded-md text-[11px] font-medium border-l-2 truncate cursor-pointer",
-        "hover:opacity-80 transition-opacity",
+        "px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-[11px] font-medium border-l-2 truncate cursor-pointer",
+        "hover:opacity-80 transition-opacity shadow-2xs",
         eventTypeColors[event.type],
         className
       )}
     >
-      {event.title}
+      <span className="truncate block">{event.title}</span>
     </div>
   );
 }
@@ -131,20 +133,20 @@ export function CalendarDay({
     <div
       onClick={onClick}
       className={cn(
-        "min-h-[100px] p-2 border border-neutral-100 cursor-pointer",
+        "min-h-[64px] sm:min-h-[96px] p-1 sm:p-2 border border-neutral-100/80 cursor-pointer",
         "transition-colors duration-150",
-        isCurrentMonth ? "bg-white" : "bg-neutral-50/50",
+        isCurrentMonth ? "bg-white" : "bg-neutral-50/60",
         isSelected && "ring-2 ring-primary ring-inset",
-        !isSelected && "hover:bg-neutral-50",
+        !isSelected && "hover:bg-neutral-50/90",
         className
       )}
     >
       <div className="flex items-center justify-between mb-1">
         <span
           className={cn(
-            "text-sm font-medium",
+            "text-xs sm:text-sm font-medium",
             isToday
-              ? "h-7 w-7 rounded-full bg-primary text-white flex items-center justify-center"
+              ? "h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-2xs"
               : isCurrentMonth
               ? "text-neutral-700"
               : "text-neutral-300"
@@ -153,13 +155,13 @@ export function CalendarDay({
           {day}
         </span>
       </div>
-      <div className="space-y-1">
-        {events.slice(0, 3).map((event) => (
+      <div className="space-y-0.5 sm:space-y-1">
+        {events.slice(0, 2).map((event) => (
           <CalendarEvent key={event.id} event={event} />
         ))}
-        {events.length > 3 && (
-          <span className="text-[10px] text-neutral-400 font-medium pl-2">
-            +{events.length - 3} more
+        {events.length > 2 && (
+          <span className="text-[9px] sm:text-[10px] text-neutral-400 font-medium pl-1 block truncate">
+            +{events.length - 2} more
           </span>
         )}
       </div>
@@ -180,13 +182,13 @@ export interface CalendarGridProps {
 
 export function CalendarGrid({ days, className }: CalendarGridProps) {
   return (
-    <div className={cn("rounded-xl border border-neutral-200 overflow-hidden", className)}>
+    <div className={cn("rounded-2xl border border-neutral-200/80 overflow-hidden shadow-xs bg-white", className)}>
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 bg-neutral-50">
+      <div className="grid grid-cols-7 bg-neutral-50/90 border-b border-neutral-200/80">
         {weekDays.map((day) => (
           <div
             key={day}
-            className="py-2 text-center text-xs font-semibold text-neutral-500 uppercase tracking-wider"
+            className="py-2 text-center text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider"
           >
             {day}
           </div>

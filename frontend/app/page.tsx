@@ -11,7 +11,7 @@ import { Toggle } from "@/components/ui/Toggle";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar, AvatarGroup } from "@/components/ui/Avatar";
 import { Modal, ConfirmModal } from "@/components/ui/Modal";
-import { ToastContainer } from "@/components/ui/Toast";
+import { ToastContainer, ToastData, ToastVariant } from "@/components/ui/Toast";
 import { Spinner, FullPageLoader, Skeleton, CardSkeleton } from "@/components/ui/Loader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Navbar, MobileNav } from "@/components/navigation/Navbar";
@@ -53,9 +53,9 @@ import { Home, Compass, Map, User } from "lucide-react";
 export default function DesignSystemShowcase() {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
-  const [toasts, setToasts] = React.useState<any[]>([]);
+  const [toasts, setToasts] = React.useState<ToastData[]>([]);
 
-  const addToast = (variant: any) => {
+  const addToast = (variant: ToastVariant) => {
     setToasts((prev) => [
       ...prev,
       {

@@ -11,8 +11,6 @@ import {
   User,
   Bell,
   Search,
-  Menu,
-  X,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 
@@ -44,12 +42,21 @@ const navItems: NavItem[] = [
   { label: "Calendar", href: "/calendar", icon: <CalendarDays className="h-5 w-5" /> },
 ];
 
+/* ───────── Route Matching Helper ───────── */
+
+export function isRouteActive(currentPath: string = "", href: string = ""): boolean {
+  if (!currentPath || !href) return false;
+  if (currentPath === href) return true;
+  if (href !== "/" && href !== "/dashboard" && currentPath.startsWith(href)) return true;
+  return false;
+}
+
 /* ───────── Logo ───────── */
 
 export function Logo({ collapsed }: { collapsed?: boolean }) {
   return (
-    <a href="/" className="flex items-center gap-2.5 group">
-      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+    <a href="/dashboard" className="flex items-center gap-2.5 group">
+      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shadow-xs group-hover:shadow-md transition-shadow">
         <Globe className="h-5 w-5 text-white" />
       </div>
       {!collapsed && (
@@ -78,14 +85,14 @@ export function Navbar({
         className
       )}
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 sm:gap-8">
         {/* Logo */}
         <Logo />
 
         {/* Navigation links */}
         <nav className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
-            const isActive = currentPath === item.href;
+            const isActive = isRouteActive(currentPath, item.href);
             return (
               <a
                 key={item.href}
@@ -94,7 +101,7 @@ export function Navbar({
                   "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium",
                   "transition-all duration-200",
                   isActive
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary/10 text-primary font-semibold"
                     : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
                 )}
               >
@@ -106,11 +113,11 @@ export function Navbar({
         </nav>
 
         {/* Right actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={onSearch}
             className="h-10 w-10 rounded-xl flex items-center justify-center text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50 transition-colors"
-            aria-label="Search"
+            aria-label="Search destinations"
           >
             <Search className="h-5 w-5" />
           </button>
@@ -127,11 +134,11 @@ export function Navbar({
             )}
           </button>
 
-          <div className="h-6 w-px bg-neutral-200 mx-1 hidden md:block" />
+          <div className="h-6 w-px bg-neutral-200 mx-1 hidden sm:block" />
 
           <a
             href="/profile"
-            className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl hover:bg-neutral-50 transition-colors"
+            className="flex items-center gap-2.5 pl-1.5 sm:pl-2 pr-2 sm:pr-3 py-1.5 rounded-xl hover:bg-neutral-50 transition-colors"
           >
             <Avatar
               src={userAvatar}
@@ -168,22 +175,22 @@ export function MobileNav({
       className={cn(
         "fixed bottom-0 left-0 right-0 z-40 md:hidden",
         "bg-white/90 backdrop-blur-xl border-t border-neutral-100",
-        "safe-bottom",
+        "safe-bottom shadow-lg",
         className
       )}
     >
       <div className="flex items-center justify-around h-16 px-2">
         {mobileItems.map((item) => {
-          const isActive = currentPath === item.href;
+          const isActive = isRouteActive(currentPath, item.href);
           return (
             <a
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 py-1 px-3 rounded-xl min-w-[56px]",
+                "relative flex flex-col items-center gap-1 py-1 px-3 rounded-xl min-w-[56px]",
                 "transition-all duration-200",
                 isActive
-                  ? "text-primary"
+                  ? "text-primary font-semibold"
                   : "text-neutral-400 hover:text-neutral-600"
               )}
             >

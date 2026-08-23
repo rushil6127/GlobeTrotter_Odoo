@@ -12,7 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Logo } from "./Navbar";
+import { Logo, isRouteActive } from "./Navbar";
 
 /* ───────── Types ───────── */
 
@@ -54,7 +54,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col h-screen sticky top-0 bg-white border-r border-neutral-100",
+        "hidden md:flex flex-col h-screen sticky top-0 bg-white/95 backdrop-blur-sm border-r border-neutral-100",
         "transition-all duration-300",
         collapsed ? "w-[72px]" : "w-[240px]",
         className
@@ -68,7 +68,7 @@ export function Sidebar({
       {/* Main nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {mainItems.map((item) => {
-          const isActive = currentPath === item.href;
+          const isActive = isRouteActive(currentPath, item.href);
           return (
             <a
               key={item.href}
@@ -79,7 +79,7 @@ export function Sidebar({
                 "transition-all duration-200",
                 collapsed && "justify-center px-2",
                 isActive
-                  ? "bg-primary/10 text-primary"
+                  ? "bg-primary/10 text-primary font-semibold"
                   : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800"
               )}
             >
@@ -93,7 +93,7 @@ export function Sidebar({
       {/* Bottom nav */}
       <div className="px-3 py-4 space-y-1 border-t border-neutral-100">
         {bottomItems.map((item) => {
-          const isActive = currentPath === item.href;
+          const isActive = isRouteActive(currentPath, item.href);
           return (
             <a
               key={item.href}
@@ -104,7 +104,7 @@ export function Sidebar({
                 "transition-all duration-200",
                 collapsed && "justify-center px-2",
                 isActive
-                  ? "bg-primary/10 text-primary"
+                  ? "bg-primary/10 text-primary font-semibold"
                   : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800"
               )}
             >

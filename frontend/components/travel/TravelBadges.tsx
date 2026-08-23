@@ -9,15 +9,11 @@ import {
   Star,
   DollarSign,
   Navigation,
-  Utensils,
-  Mountain,
-  Landmark,
-  TreePine,
-  ShoppingBag,
-  Camera,
-  Moon,
-  Palmtree,
 } from "lucide-react";
+import {
+  ActivityCategory,
+  getActivityCategoryConfig,
+} from "@/lib/categories";
 
 /* ═════════════════════════════════════════
    DESTINATION BADGE
@@ -50,18 +46,7 @@ export function DestinationBadge({
    CATEGORY BADGE
    ═════════════════════════════════════════ */
 
-type Category = "food" | "adventure" | "culture" | "nature" | "shopping" | "sightseeing" | "nightlife" | "relaxation";
-
-const categoryMap: Record<Category, { icon: React.ReactNode; color: string; label: string }> = {
-  food: { icon: <Utensils className="h-3.5 w-3.5" />, color: "bg-orange-50 text-orange-700 border-orange-200", label: "Food" },
-  adventure: { icon: <Mountain className="h-3.5 w-3.5" />, color: "bg-red-50 text-red-700 border-red-200", label: "Adventure" },
-  culture: { icon: <Landmark className="h-3.5 w-3.5" />, color: "bg-violet-50 text-violet-700 border-violet-200", label: "Culture" },
-  nature: { icon: <TreePine className="h-3.5 w-3.5" />, color: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Nature" },
-  shopping: { icon: <ShoppingBag className="h-3.5 w-3.5" />, color: "bg-pink-50 text-pink-700 border-pink-200", label: "Shopping" },
-  sightseeing: { icon: <Camera className="h-3.5 w-3.5" />, color: "bg-sky-50 text-sky-700 border-sky-200", label: "Sightseeing" },
-  nightlife: { icon: <Moon className="h-3.5 w-3.5" />, color: "bg-indigo-50 text-indigo-700 border-indigo-200", label: "Nightlife" },
-  relaxation: { icon: <Palmtree className="h-3.5 w-3.5" />, color: "bg-teal-50 text-teal-700 border-teal-200", label: "Relaxation" },
-};
+export type Category = ActivityCategory;
 
 export function CategoryBadge({
   category,
@@ -70,16 +55,20 @@ export function CategoryBadge({
   category: Category;
   className?: string;
 }) {
-  const cat = categoryMap[category];
+  const cat = getActivityCategoryConfig(category);
+  const Icon = cat.icon;
+
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border",
+        cat.bgColor,
         cat.color,
+        cat.borderColor,
         className
       )}
     >
-      {cat.icon}
+      <Icon className="h-3.5 w-3.5" />
       {cat.label}
     </span>
   );
@@ -218,7 +207,7 @@ export function RatingBadge({
    TRIP STATUS BADGE
    ═════════════════════════════════════════ */
 
-type TripStatus = "upcoming" | "ongoing" | "completed";
+export type TripStatus = "upcoming" | "ongoing" | "completed";
 
 const statusConfig: Record<TripStatus, { label: string; dotColor: string; bgColor: string }> = {
   upcoming: {
