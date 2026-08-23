@@ -26,6 +26,10 @@ import {
 } from "@/lib/api/itinerary";
 import { getTrip, type Trip } from "@/lib/api/trips";
 import { ShareTripModal } from "@/components/trips/ShareTripModal";
+import { AiPlannerModal } from "@/components/ai/AiPlannerModal";
+import { MembersModal } from "@/components/collaboration/MembersModal";
+import { CommentsModal } from "@/components/collaboration/CommentsModal";
+import { VoteButton } from "@/components/collaboration/VoteButton";
 import {
   Plus,
   Clock,
@@ -43,6 +47,8 @@ import {
   ArrowRight,
   Wallet,
   Share2,
+  Users,
+  MessageSquare,
 } from "lucide-react";
 
 /* ── helpers ── */
@@ -69,6 +75,7 @@ const categoryColors: Record<string, string> = {
 
 /* ── Itinerary Item Card ── */
 function ItineraryItemCard({
+  tripId,
   item,
   idx,
   total,
@@ -76,7 +83,9 @@ function ItineraryItemCard({
   onEdit,
   onDelete,
   onMove,
+  onComment,
 }: {
+  tripId: string;
   item: ItineraryItem;
   idx: number;
   total: number;
@@ -84,11 +93,14 @@ function ItineraryItemCard({
   onEdit: (item: ItineraryItem) => void;
   onDelete: (item: ItineraryItem) => void;
   onMove: (item: ItineraryItem, dir: -1 | 1) => void;
+  onComment: (item: ItineraryItem) => void;
 }) {
   const cat = item.activity?.category;
   const catClass = cat
     ? categoryColors[cat] ?? "text-neutral-700 bg-neutral-100 border-neutral-200"
     : "text-neutral-700 bg-neutral-100 border-neutral-200";
+
+  const activityId = item.activity?.id || item.activityId;
 
   return (
     <div className="flex items-start gap-3.5 group bg-white/90 backdrop-blur-sm rounded-2xl border border-neutral-200/70 p-4 sm:p-5 shadow-sm hover:shadow-md transition-all">
@@ -123,25 +135,43 @@ function ItineraryItemCard({
             </h4>
           </div>
 
-          {/* Action Buttons */}
-          {canEdit && (
-            <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={() => onEdit(item)}
-                className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors"
-                title="Edit item"
-              >
-                <Pencil className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => onDelete(item)}
-                className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                title="Delete item"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          )}
+          {/* Action Buttons & Collaborative Tools */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {activityId && (
+              <VoteButton
+                tripId={tripId}
+                activityId={activityId}
+                size="sm"
+              />
+            )}
+
+            <button
+              onClick={() => onComment(item)}
+              className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors"
+              title="Discuss / comments"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </button>
+
+            {canEdit && (
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => onEdit(item)}
+                  className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors"
+                  title="Edit item"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(item)}
+                  className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  title="Delete item"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Time, Cost & Category Pills */}
@@ -375,6 +405,9 @@ export default function ItineraryPage() {
   const [selectedDayNum, setSelectedDayNum] = useState<number | "all">("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
+  const [commentItem, setCommentItem] = useState<ItineraryItem | null>(null);
   const [editItem, setEditItem] = useState<ItineraryItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<ItineraryItem | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -457,6 +490,24 @@ export default function ItineraryPage() {
             </p>
           </div>
           <div className="flex items-center gap-2.5 flex-wrap">
+            <Button
+              variant="outline"
+              size="lg"
+              leftIcon={<Sparkles className="h-4 w-4 text-amber-500" />}
+              onClick={() => setAiModalOpen(true)}
+              className="bg-gradient-to-r from-amber-50 to-orange-50/70 border-amber-200/90 text-amber-900 shadow-xs font-bold"
+            >
+              Plan with AI
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              leftIcon={<Users className="h-4 w-4 text-primary" />}
+              onClick={() => setMembersOpen(true)}
+              className="bg-white shadow-xs font-bold"
+            >
+              Collaborators
+            </Button>
             <Button
               variant="outline"
               size="lg"
@@ -609,6 +660,7 @@ export default function ItineraryPage() {
                     {day.items.map((item, idx) => (
                       <ItineraryItemCard
                         key={item.id}
+                        tripId={tripId}
                         item={item}
                         idx={idx}
                         total={day.items.length}
@@ -619,6 +671,7 @@ export default function ItineraryPage() {
                         }}
                         onDelete={(i) => setDeleteItem(i)}
                         onMove={(i, dir) => handleMove(day, i, dir)}
+                        onComment={(i) => setCommentItem(i)}
                       />
                     ))}
                   </div>
@@ -668,6 +721,42 @@ export default function ItineraryPage() {
           onClose={() => setShareOpen(false)}
           tripId={trip.id}
           tripName={trip.name}
+        />
+      )}
+
+      {/* AI Planner Modal */}
+      {trip && (
+        <AiPlannerModal
+          open={aiModalOpen}
+          onClose={() => setAiModalOpen(false)}
+          tripId={trip.id}
+          tripName={trip.name}
+          defaultDestination={trip.name.split(" ")[0] || "Goa"}
+          defaultDays={totalDaysCount}
+          defaultBudget={trip.budget || 50000}
+          onItinerarySaved={refetch}
+        />
+      )}
+
+      {/* Members & Collaborators Modal */}
+      {trip && (
+        <MembersModal
+          open={membersOpen}
+          onClose={() => setMembersOpen(false)}
+          tripId={trip.id}
+          tripName={trip.name}
+        />
+      )}
+
+      {/* Comments & Discussion Modal */}
+      {trip && (
+        <CommentsModal
+          open={Boolean(commentItem)}
+          onClose={() => setCommentItem(null)}
+          tripId={trip.id}
+          tripName={trip.name}
+          itineraryItemId={commentItem?.id}
+          itemTitle={commentItem?.title}
         />
       )}
     </PageShell>
