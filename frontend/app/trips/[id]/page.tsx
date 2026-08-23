@@ -659,7 +659,34 @@ export default function TripDetailPage() {
               </div>
 
               {/* Right Column: Quick Action Cards */}
-              <div className="space-y-6">
+              <div className="space-y-5">
+                {/* AI Planner CTA Card */}
+                <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-white rounded-3xl border border-amber-300/60 p-6 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="h-10 w-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/25">
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300/40">
+                      Smart Assistant
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-neutral-900 text-base">✨ AI Itinerary Planner</h3>
+                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
+                      Generate a custom day-wise itinerary matching your travel style and budget in seconds.
+                    </p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    fullWidth
+                    onClick={() => setAiModalOpen(true)}
+                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-md shadow-amber-500/20"
+                  >
+                    Launch AI Planner
+                  </Button>
+                </div>
+
                 {/* Itinerary CTA Card */}
                 <div className="bg-gradient-to-br from-primary-50 to-white rounded-3xl border border-primary/20 p-6 shadow-sm space-y-4">
                   <div className="h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md shadow-primary/25">
@@ -668,7 +695,7 @@ export default function TripDetailPage() {
                   <div>
                     <h3 className="font-bold text-neutral-900 text-base">Schedule Activities</h3>
                     <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
-                      Plan Day 1, Day 2, and beyond. Add sights, food tours, and excursions.
+                      Plan Day 1, Day 2, and beyond. Add sights, food tours, voting, and comments.
                     </p>
                   </div>
                   <Button
@@ -682,30 +709,53 @@ export default function TripDetailPage() {
                   </Button>
                 </div>
 
-                {/* Budget CTA Card — Coming Soon */}
-                <div className="bg-neutral-50/80 rounded-3xl border border-neutral-200/60 p-6 shadow-sm space-y-4 opacity-60">
-                  <div className="h-10 w-10 rounded-2xl bg-neutral-200 text-neutral-400 flex items-center justify-center">
+                {/* Budget CTA Card */}
+                <div className="bg-gradient-to-br from-emerald-50 to-white rounded-3xl border border-emerald-200/80 p-6 shadow-sm space-y-4">
+                  <div className="h-10 w-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/25">
                     <Wallet className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-neutral-500 text-base">Budget & Expenses</h3>
-                      <span className="text-[9px] font-bold uppercase tracking-wide bg-neutral-200 text-neutral-400 px-1.5 py-0.5 rounded-md">
-                        Soon
-                      </span>
-                    </div>
-                    <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                      Track trip spending and optimize your budget. Coming in a future release.
+                    <h3 className="font-bold text-neutral-900 text-base">Budget &amp; Optimizer</h3>
+                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
+                      Track expenses, log costs per day, and run the Smart Budget Optimizer.
                     </p>
                   </div>
                   <Button
                     variant="outline"
                     size="md"
                     fullWidth
-                    disabled
-                    className="cursor-not-allowed opacity-50"
+                    rightIcon={<ArrowRight className="h-4 w-4" />}
+                    onClick={() => router.push(`/trips/${trip.id}/budget`)}
+                    className="font-bold text-emerald-800 border-emerald-300 hover:bg-emerald-50"
                   >
-                    Coming Soon
+                    View Budget
+                  </Button>
+                </div>
+
+                {/* Collaborators CTA Card */}
+                <div className="bg-white rounded-3xl border border-neutral-200/80 p-6 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase">
+                      Group Access
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-neutral-900 text-base">Trip Collaborators</h3>
+                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
+                      Invite friends, assign Editor/Viewer roles, vote on activities, and discuss plans.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    fullWidth
+                    onClick={() => setMembersOpen(true)}
+                    className="font-bold"
+                  >
+                    Manage Members
                   </Button>
                 </div>
               </div>

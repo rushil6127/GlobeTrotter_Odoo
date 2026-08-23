@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Loader";
 import { useApiData } from "@/lib/hooks/useApiData";
 import {
@@ -28,6 +27,7 @@ import {
   Check,
   Mail,
   Send,
+  Sparkles,
 } from "lucide-react";
 
 export interface MembersModalProps {
@@ -133,19 +133,22 @@ export function MembersModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Trip Collaborators &amp; Access"
+      title="Trip Collaborators & Access"
       size="md"
     >
       <div className="space-y-5">
-        {/* Header Summary */}
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-neutral-50 border border-neutral-200">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
-            <Users className="h-5 w-5" />
+        {/* Header Summary Banner */}
+        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-primary-950 via-primary-900 to-indigo-950 text-white shadow-sm">
+          <div className="h-11 w-11 rounded-2xl bg-white/10 flex items-center justify-center font-bold shrink-0 border border-white/15">
+            <Users className="h-5 w-5 text-amber-300" />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-bold text-neutral-900 truncate">{tripName}</h4>
-            <p className="text-xs text-neutral-500">
-              {members.length + 1} {members.length === 0 ? "person" : "collaborators"} on this trip
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-primary-200">
+              Trip Access &amp; Permissions
+            </p>
+            <h4 className="text-sm font-display font-extrabold text-white truncate">{tripName}</h4>
+            <p className="text-[11px] text-primary-100">
+              {members.length + 1} {members.length === 0 ? "person" : "collaborators"} planning together
             </p>
           </div>
         </div>
@@ -160,10 +163,10 @@ export function MembersModal({
 
         {/* Invite Member Section (OWNER only) */}
         {isOwner && (
-          <form onSubmit={handleInvite} className="p-4 rounded-2xl bg-primary/5 border border-primary/15 space-y-3">
+          <form onSubmit={handleInvite} className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
-                <UserPlus className="h-3.5 w-3.5" />
+              <span className="text-xs font-extrabold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                <UserPlus className="h-4 w-4" />
                 Invite Collaborator
               </span>
               {inviteSuccess && (
@@ -176,13 +179,13 @@ export function MembersModal({
 
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
                 <input
                   type="email"
                   placeholder="collaborator@example.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full h-10 pl-9 pr-3 rounded-xl border border-neutral-200 text-xs font-medium focus:outline-none focus:border-primary bg-white"
+                  className="w-full h-10 pl-9 pr-3 rounded-xl border border-neutral-200 text-xs font-medium focus:outline-none focus:border-primary bg-white shadow-2xs"
                   required
                 />
               </div>
@@ -190,7 +193,7 @@ export function MembersModal({
               <select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value as "EDITOR" | "VIEWER")}
-                className="h-10 px-3 rounded-xl border border-neutral-200 text-xs font-bold bg-white text-neutral-700 focus:outline-none focus:border-primary"
+                className="h-10 px-3 rounded-xl border border-neutral-200 text-xs font-bold bg-white text-neutral-700 focus:outline-none focus:border-primary shadow-2xs"
               >
                 <option value="EDITOR">Editor (Can edit)</option>
                 <option value="VIEWER">Viewer (Read-only)</option>
@@ -202,7 +205,7 @@ export function MembersModal({
                 size="sm"
                 loading={isInviting}
                 leftIcon={<Send className="h-3.5 w-3.5" />}
-                className="h-10 px-4 shrink-0 shadow-xs"
+                className="h-10 px-4 shrink-0 shadow-sm"
               >
                 Invite
               </Button>
@@ -213,42 +216,47 @@ export function MembersModal({
         {/* Loading Skeletons */}
         {isLoading && (
           <div className="space-y-3 py-2">
-            <Skeleton variant="rounded" height={45} />
-            <Skeleton variant="rounded" height={45} />
+            <Skeleton variant="rounded" height={52} />
+            <Skeleton variant="rounded" height={52} />
           </div>
         )}
 
         {/* Member List */}
         {!isLoading && owner && (
           <div className="space-y-2.5">
-            <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block">
-              Trip Collaborators
+            <span className="text-[11px] font-extrabold text-neutral-400 uppercase tracking-wider block">
+              Trip Members
             </span>
 
             {/* Owner Row */}
-            <div className="p-3 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-2xl bg-white border border-amber-200/80 shadow-2xs flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center font-bold text-xs uppercase border border-amber-500/20 shrink-0">
-                  {owner.avatar ? (
-                    <img src={owner.avatar} alt={owner.name} className="h-full w-full rounded-xl object-cover" />
-                  ) : (
-                    owner.name.charAt(0)
-                  )}
+                <div className="relative">
+                  <div className="h-10 w-10 rounded-2xl bg-amber-500/15 text-amber-800 flex items-center justify-center font-extrabold text-sm uppercase border border-amber-400/40 shrink-0">
+                    {owner.avatar ? (
+                      <img src={owner.avatar} alt={owner.name} className="h-full w-full rounded-2xl object-cover" />
+                    ) : (
+                      owner.name.charAt(0)
+                    )}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[9px] shadow-2xs">
+                    <Crown className="h-2.5 w-2.5" />
+                  </div>
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold text-neutral-900 truncate">{owner.name}</span>
                     {currentUser?.id === owner.id && (
-                      <span className="text-[10px] text-neutral-400 font-bold">(You)</span>
+                      <span className="text-[10px] text-primary font-bold">(You)</span>
                     )}
                   </div>
                   <p className="text-[11px] text-neutral-400 truncate">{owner.email}</p>
                 </div>
               </div>
 
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-extrabold shrink-0">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-300 text-[11px] font-extrabold shrink-0 shadow-2xs">
                 <Crown className="h-3 w-3 text-amber-600" />
-                Owner
+                Trip Owner
               </span>
             </div>
 
@@ -256,21 +264,26 @@ export function MembersModal({
             {members.map((m) => (
               <div
                 key={m.id}
-                className="p-3 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs flex items-center justify-between gap-3 group"
+                className="p-3.5 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs flex items-center justify-between gap-3 group"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase border border-primary/20 shrink-0">
-                    {m.user.avatar ? (
-                      <img src={m.user.avatar} alt={m.user.name} className="h-full w-full rounded-xl object-cover" />
-                    ) : (
-                      m.user.name.charAt(0)
-                    )}
+                  <div className="relative">
+                    <div className="h-10 w-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-extrabold text-sm uppercase border border-primary/20 shrink-0">
+                      {m.user.avatar ? (
+                        <img src={m.user.avatar} alt={m.user.name} className="h-full w-full rounded-2xl object-cover" />
+                      ) : (
+                        m.user.name.charAt(0)
+                      )}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-primary text-white flex items-center justify-center text-[9px] shadow-2xs">
+                      {m.role === "EDITOR" ? <Shield className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
+                    </div>
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-bold text-neutral-900 truncate">{m.user.name}</span>
                       {currentUser?.id === m.userId && (
-                        <span className="text-[10px] text-neutral-400 font-bold">(You)</span>
+                        <span className="text-[10px] text-primary font-bold">(You)</span>
                       )}
                     </div>
                     <p className="text-[11px] text-neutral-400 truncate">{m.user.email}</p>
@@ -284,7 +297,7 @@ export function MembersModal({
                       value={m.role}
                       disabled={updatingMemberId === m.id}
                       onChange={(e) => handleRoleChange(m.id, e.target.value as "EDITOR" | "VIEWER")}
-                      className="h-8 px-2 rounded-lg border border-neutral-200 text-xs font-bold bg-neutral-50 text-neutral-700 focus:outline-none focus:border-primary"
+                      className="h-8 px-2.5 rounded-xl border border-neutral-200 text-xs font-bold bg-neutral-50 text-neutral-700 focus:outline-none focus:border-primary shadow-2xs"
                     >
                       <option value="EDITOR">Editor</option>
                       <option value="VIEWER">Viewer</option>
@@ -292,7 +305,7 @@ export function MembersModal({
                   ) : (
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border",
+                        "inline-flex items-center gap-1 px-3 py-1 rounded-xl text-[11px] font-extrabold border shadow-2xs",
                         m.role === "EDITOR"
                           ? "bg-primary/10 text-primary border-primary/20"
                           : "bg-neutral-100 text-neutral-600 border-neutral-200"
@@ -309,10 +322,10 @@ export function MembersModal({
                       type="button"
                       disabled={removingMemberId === m.id}
                       onClick={() => handleRemove(m.id)}
-                      className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-2 rounded-xl text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                       title="Remove collaborator"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                 </div>
