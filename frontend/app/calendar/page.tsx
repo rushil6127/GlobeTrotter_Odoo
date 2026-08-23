@@ -32,6 +32,8 @@ import {
   AlertCircle,
   RefreshCw,
   Wallet,
+  Sparkles,
+  MapPin,
 } from "lucide-react";
 
 /* ── Helpers ── */
@@ -96,21 +98,21 @@ function DayDetailModal({
     >
       <div className="space-y-4">
         {trip && (
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-primary/5 border border-primary/15">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-primary/10 to-indigo-50/80 border border-primary/20">
             <div>
-              <p className="text-xs font-bold text-primary uppercase tracking-wider">
+              <p className="text-[10px] font-extrabold text-primary uppercase tracking-wider">
                 {trip.name}
               </p>
-              <p className="text-sm font-semibold text-neutral-800">
-                {tripDayNumber ? `Day ${tripDayNumber} of trip` : "Scheduled Date"}
+              <p className="text-sm font-bold text-neutral-900 mt-0.5">
+                {tripDayNumber ? `Day ${tripDayNumber} of trip schedule` : "Scheduled Date"}
               </p>
             </div>
             {totalCost > 0 && (
               <div className="text-right">
-                <span className="text-[10px] text-neutral-400 uppercase font-semibold">
-                  Day Cost
+                <span className="text-[10px] text-neutral-400 uppercase font-bold">
+                  Day Estimated Cost
                 </span>
-                <p className="text-sm font-bold text-neutral-900">
+                <p className="text-base font-extrabold text-neutral-900">
                   {sym}{totalCost.toLocaleString()}
                 </p>
               </div>
@@ -120,8 +122,8 @@ function DayDetailModal({
 
         <div className="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
           {events.length === 0 ? (
-            <div className="py-8 text-center bg-neutral-50 rounded-2xl border border-dashed border-neutral-200 space-y-2">
-              <Clock className="h-7 w-7 text-neutral-300 mx-auto" />
+            <div className="py-10 text-center bg-neutral-50 rounded-2xl border border-dashed border-neutral-200 space-y-2.5">
+              <Clock className="h-8 w-8 text-neutral-300 mx-auto" />
               <p className="text-xs text-neutral-500 font-medium">
                 No activities scheduled for this date.
               </p>
@@ -144,7 +146,7 @@ function DayDetailModal({
                 <div className="flex items-start justify-between gap-3">
                   <h4 className="text-sm font-bold text-neutral-900">{event.title}</h4>
                   {event.estimatedCost != null && event.estimatedCost > 0 && (
-                    <span className="text-xs font-bold text-neutral-800 shrink-0">
+                    <span className="text-xs font-extrabold text-neutral-900 shrink-0">
                       {sym}{event.estimatedCost.toLocaleString()}
                     </span>
                   )}
@@ -152,21 +154,21 @@ function DayDetailModal({
 
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   {event.startTime && (
-                    <span className="inline-flex items-center gap-1 font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md text-[11px]">
+                    <span className="inline-flex items-center gap-1 font-mono font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-lg text-[11px]">
                       <Clock className="h-3 w-3" />
                       {event.startTime}
                       {event.endTime ? ` - ${event.endTime}` : ""}
                     </span>
                   )}
                   {event.category && (
-                    <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-neutral-100 text-neutral-700">
+                    <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-neutral-100 text-neutral-700">
                       {event.category}
                     </span>
                   )}
                 </div>
 
                 {event.notes && (
-                  <p className="text-xs text-neutral-500 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100 leading-relaxed">
+                  <p className="text-xs text-neutral-600 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100 leading-relaxed">
                     {event.notes}
                   </p>
                 )}
@@ -439,7 +441,7 @@ export default function CalendarPage() {
         {/* Page Header with Trip Selection */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-display font-bold text-neutral-900 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-display font-extrabold text-neutral-900 tracking-tight">
               Trip Calendar
             </h1>
             <p className="text-sm text-neutral-500 mt-1">
@@ -469,11 +471,11 @@ export default function CalendarPage() {
                 <Button
                   size="md"
                   variant="outline"
-                  leftIcon={<CalendarIcon className="h-4 w-4" />}
+                  leftIcon={<CalendarIcon className="h-4 w-4 text-primary" />}
                   onClick={handleJumpToTripStart}
                   className="shadow-xs"
                 >
-                  Jump to Trip
+                  Jump to Trip Dates
                 </Button>
               )}
             </div>
@@ -523,13 +525,13 @@ export default function CalendarPage() {
           <div className="space-y-5">
             {/* Active Trip Info Bar */}
             {activeTrip && (
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/90 backdrop-blur-md rounded-2xl border border-neutral-200/70 p-4 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/95 backdrop-blur-xl rounded-3xl border border-neutral-200/80 p-5 shadow-sm">
+                <div className="flex items-center gap-3.5">
+                  <div className="h-11 w-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
                     <CalendarDays className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-neutral-900">{activeTrip.name}</h3>
+                    <h3 className="text-base font-extrabold text-neutral-900">{activeTrip.name}</h3>
                     <p className="text-xs text-neutral-500 font-medium">
                       {fmtDatePretty(activeTrip.startDate)} – {fmtDatePretty(activeTrip.endDate)}
                     </p>
@@ -539,17 +541,17 @@ export default function CalendarPage() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/trips/${activeTrip.id}/itinerary`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold transition-colors"
                   >
                     <Clock className="h-3.5 w-3.5 text-primary" />
                     Open Itinerary
                   </Link>
                   <Link
                     href={`/trips/${activeTrip.id}/budget`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold transition-colors"
                   >
                     <Wallet className="h-3.5 w-3.5 text-secondary-600" />
-                    Budget
+                    Budget Tracker
                   </Link>
                 </div>
               </div>
@@ -569,17 +571,17 @@ export default function CalendarPage() {
 
             {/* Legend */}
             <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-500 pt-2 px-1">
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 font-medium">
                 <span className="h-3 w-3 rounded-full bg-primary" />
                 Trip Active Days
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-amber-400" />
+              <span className="flex items-center gap-1.5 font-medium">
+                <span className="h-3 w-3 rounded-full bg-amber-500" />
                 Today
               </span>
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 font-medium">
                 <span className="h-3 w-3 rounded-md bg-sky-100 border border-sky-300" />
-                Scheduled Activity (Click day for details)
+                Scheduled Activity (Click any day to view details)
               </span>
             </div>
           </div>

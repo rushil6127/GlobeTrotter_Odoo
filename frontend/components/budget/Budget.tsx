@@ -14,10 +14,14 @@ import {
   MoreHorizontal,
   Trash2,
   Edit,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
+  CheckCircle2,
 } from "lucide-react";
 
 /* ═════════════════════════════════════════
-   EXPENSE CATEGORY BADGE
+   EXPENSE CATEGORY CONFIGURATION & BADGES
    ═════════════════════════════════════════ */
 
 export type ExpenseCategory =
@@ -28,45 +32,64 @@ export type ExpenseCategory =
   | "shopping"
   | "other";
 
-const expenseCategoryConfig: Record<
+export const expenseCategoryConfig: Record<
   ExpenseCategory,
-  { icon: React.ReactNode; color: string; bgColor: string; label: string }
+  {
+    icon: React.ReactNode;
+    color: string;
+    bgColor: string;
+    borderColor: string;
+    barColor: string;
+    label: string;
+  }
 > = {
   transport: {
-    icon: <Car className="h-4 w-4" />,
-    color: "text-sky-600",
+    icon: <Car className="h-3.5 w-3.5" />,
+    color: "text-sky-700",
     bgColor: "bg-sky-50",
+    borderColor: "border-sky-200",
+    barColor: "bg-sky-500",
     label: "Transport",
   },
   food: {
-    icon: <Utensils className="h-4 w-4" />,
-    color: "text-orange-600",
-    bgColor: "bg-orange-50",
-    label: "Food",
+    icon: <Utensils className="h-3.5 w-3.5" />,
+    color: "text-amber-700",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-200",
+    barColor: "bg-amber-500",
+    label: "Food & Dining",
   },
   accommodation: {
-    icon: <BedDouble className="h-4 w-4" />,
-    color: "text-violet-600",
-    bgColor: "bg-violet-50",
+    icon: <BedDouble className="h-3.5 w-3.5" />,
+    color: "text-indigo-700",
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-200",
+    barColor: "bg-indigo-500",
     label: "Accommodation",
   },
   activities: {
-    icon: <Ticket className="h-4 w-4" />,
-    color: "text-emerald-600",
+    icon: <Ticket className="h-3.5 w-3.5" />,
+    color: "text-emerald-700",
     bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-200",
+    barColor: "bg-emerald-500",
     label: "Activities",
   },
   shopping: {
-    icon: <ShoppingBag className="h-4 w-4" />,
-    color: "text-pink-600",
+    icon: <ShoppingBag className="h-3.5 w-3.5" />,
+    color: "text-pink-700",
     bgColor: "bg-pink-50",
+    borderColor: "border-pink-200",
+    barColor: "bg-pink-500",
     label: "Shopping",
   },
   other: {
-    icon: <Wallet className="h-4 w-4" />,
-    color: "text-neutral-600",
-    bgColor: "bg-neutral-50",
-    label: "Other",
+    icon: <Wallet className="h-3.5 w-3.5" />,
+    color: "text-slate-700",
+    bgColor: "bg-slate-50",
+    borderColor: "border-slate-200",
+    barColor: "bg-slate-500",
+    label: "Other Expenses",
   },
 };
 
@@ -74,21 +97,26 @@ export function ExpenseCategoryBadge({
   category,
   className,
 }: {
-  category: ExpenseCategory;
+  category: ExpenseCategory | string;
   className?: string;
 }) {
-  const config = expenseCategoryConfig[category];
+  const catKey = (category?.toLowerCase() as ExpenseCategory) in expenseCategoryConfig
+    ? (category.toLowerCase() as ExpenseCategory)
+    : "other";
+  const config = expenseCategoryConfig[catKey];
+
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium",
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold border",
         config.bgColor,
         config.color,
+        config.borderColor,
         className
       )}
     >
       {config.icon}
-      {config.label}
+      <span>{config.label}</span>
     </span>
   );
 }
@@ -118,29 +146,44 @@ export function BudgetProgressBar({
   const isOver = spent > total;
   const isWarning = percentage > 80 && !isOver;
 
-  const heights = { sm: "h-1.5", md: "h-2.5", lg: "h-4" };
+  const heights = { sm: "h-2", md: "h-3", lg: "h-4" };
 
   return (
-    <div className={cn("space-y-1.5", className)}>
+    <div className={cn("space-y-2", className)}>
       {showLabels && (
-        <div className="flex justify-between text-xs text-neutral-500">
-          <span>
-            {currency}{spent.toLocaleString()} of {currency}{total.toLocaleString()}
-          </span>
-          <span className={cn("font-semibold", isOver ? "text-error" : isWarning ? "text-amber-600" : "text-primary")}>
-            {percentage}%
+        <div className="flex items-center justify-between text-xs font-medium text-neutral-600">
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-neutral-900">
+              {currency}{spent.toLocaleString()}
+            </span>
+            <span className="text-neutral-400">of</span>
+            <span className="text-neutral-700">
+              {currency}{total.toLocaleString()}
+            </span>
+          </div>
+          <span
+            className={cn(
+              "font-bold px-2 py-0.5 rounded-full text-[11px]",
+              isOver
+                ? "bg-red-100 text-red-700"
+                : isWarning
+                ? "bg-amber-100 text-amber-800"
+                : "bg-primary/10 text-primary"
+            )}
+          >
+            {percentage}% Used
           </span>
         </div>
       )}
-      <div className={cn("bg-neutral-100 rounded-full overflow-hidden", heights[size])}>
+      <div className={cn("bg-neutral-100/90 rounded-full overflow-hidden p-0.5 border border-neutral-200/60", heights[size])}>
         <div
           className={cn(
-            "h-full rounded-full transition-all duration-700 ease-out",
+            "h-full rounded-full transition-all duration-700 ease-out shadow-xs",
             isOver
-              ? "bg-gradient-to-r from-red-400 to-red-500"
+              ? "bg-gradient-to-r from-red-500 to-rose-600 animate-pulse"
               : isWarning
-              ? "bg-gradient-to-r from-amber-400 to-amber-500"
-              : "bg-gradient-to-r from-primary to-primary-400"
+              ? "bg-gradient-to-r from-amber-400 to-orange-500"
+              : "bg-gradient-to-r from-primary to-primary-600"
           )}
           style={{ width: `${Math.min(percentage, 100)}%` }}
         />
@@ -150,14 +193,78 @@ export function BudgetProgressBar({
 }
 
 /* ═════════════════════════════════════════
-   EXPENSE ROW
+   CATEGORY DISTRIBUTION BAR (MULTI-SEGMENT)
+   ═════════════════════════════════════════ */
+
+export interface CategoryBreakdownItem {
+  category: ExpenseCategory | string;
+  amount: number;
+  count?: number;
+}
+
+export function CategoryDistributionBar({
+  categories,
+  totalSpent,
+  selectedCategory,
+  onSelectCategory,
+  className,
+}: {
+  categories: CategoryBreakdownItem[];
+  totalSpent: number;
+  selectedCategory?: string | null;
+  onSelectCategory?: (category: string | null) => void;
+  className?: string;
+}) {
+  if (!categories || categories.length === 0 || totalSpent <= 0) {
+    return (
+      <div className={cn("h-3 bg-neutral-100 rounded-full", className)} />
+    );
+  }
+
+  return (
+    <div className={cn("space-y-3", className)}>
+      {/* Multi-segment bar */}
+      <div className="h-3.5 w-full bg-neutral-100 rounded-full overflow-hidden flex gap-0.5 p-0.5 border border-neutral-200/60 shadow-inner">
+        {categories.map(({ category, amount }) => {
+          const catKey = (category.toLowerCase() as ExpenseCategory) in expenseCategoryConfig
+            ? (category.toLowerCase() as ExpenseCategory)
+            : "other";
+          const config = expenseCategoryConfig[catKey];
+          const pct = totalSpent > 0 ? (amount / totalSpent) * 100 : 0;
+          if (pct <= 0) return null;
+
+          const isSelected = selectedCategory === category;
+
+          return (
+            <button
+              key={category}
+              type="button"
+              onClick={() => onSelectCategory?.(isSelected ? null : category)}
+              title={`${config.label}: ${Math.round(pct)}%`}
+              style={{ width: `${pct}%` }}
+              className={cn(
+                "h-full rounded-sm transition-all duration-300 relative group cursor-pointer focus:outline-none",
+                config.barColor,
+                isSelected ? "ring-2 ring-neutral-900 ring-offset-1 z-10 brightness-110" : "hover:brightness-110"
+              )}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ═════════════════════════════════════════
+   EXPENSE ROW COMPONENT
    ═════════════════════════════════════════ */
 
 export interface ExpenseRowProps {
+  id?: string;
   description: string;
   amount: number;
   currency?: string;
-  category: ExpenseCategory;
+  category: ExpenseCategory | string;
   date: string;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -174,49 +281,73 @@ export function ExpenseRow({
   onDelete,
   className,
 }: ExpenseRowProps) {
-  const config = expenseCategoryConfig[category];
+  const catKey = (category.toLowerCase() as ExpenseCategory) in expenseCategoryConfig
+    ? (category.toLowerCase() as ExpenseCategory)
+    : "other";
+  const config = expenseCategoryConfig[catKey];
 
   return (
     <div
       className={cn(
-        "flex items-center gap-4 py-3 px-4 rounded-xl",
-        "hover:bg-neutral-50 transition-colors group",
+        "flex items-center gap-3.5 py-3.5 px-4 rounded-2xl bg-white border border-neutral-200/80 shadow-xs",
+        "hover:border-neutral-300 hover:shadow-sm transition-all duration-200 group",
         className
       )}
     >
-      <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", config.bgColor, config.color)}>
+      <div
+        className={cn(
+          "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border",
+          config.bgColor,
+          config.color,
+          config.borderColor
+        )}
+      >
         {config.icon}
       </div>
+
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-neutral-800 truncate">
+        <p className="text-sm font-bold text-neutral-900 truncate">
           {description}
         </p>
-        <p className="text-xs text-neutral-400">{date}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-[11px] font-medium text-neutral-400">
+            {date}
+          </span>
+          <span className="text-neutral-300">•</span>
+          <span className={cn("text-[11px] font-semibold", config.color)}>
+            {config.label}
+          </span>
+        </div>
       </div>
-      <div className="text-right">
-        <p className="text-sm font-bold text-neutral-900">
+
+      <div className="text-right shrink-0">
+        <p className="text-sm font-extrabold text-neutral-900">
           {currency}{amount.toLocaleString()}
         </p>
-        <p className="text-[10px] text-neutral-400 uppercase">{config.label}</p>
       </div>
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {onEdit && (
-          <button
-            onClick={onEdit}
-            className="h-7 w-7 rounded-md flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/5"
-          >
-            <Edit className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {onDelete && (
-          <button
-            onClick={onDelete}
-            className="h-7 w-7 rounded-md flex items-center justify-center text-neutral-400 hover:text-error hover:bg-red-50"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </div>
+
+      {(onEdit || onDelete) && (
+        <div className="flex items-center gap-1 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0 pl-1">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              title="Edit Expense"
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors"
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              title="Delete Expense"
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-error hover:bg-red-50 transition-colors"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -229,7 +360,10 @@ export interface BudgetSummaryCardProps {
   totalBudget: number;
   spent: number;
   currency?: string;
-  categories: { category: ExpenseCategory; amount: number }[];
+  tripDays?: number;
+  averagePerDay?: number;
+  dailyBudgetAllowance?: number;
+  categories: { category: ExpenseCategory | string; amount: number }[];
   className?: string;
 }
 
@@ -237,136 +371,126 @@ export function BudgetSummaryCard({
   totalBudget,
   spent,
   currency = "₹",
+  tripDays = 1,
+  averagePerDay,
+  dailyBudgetAllowance,
   categories,
   className,
 }: BudgetSummaryCardProps) {
   const remaining = totalBudget - spent;
   const isOver = remaining < 0;
+  const avgDay = averagePerDay ?? (tripDays > 0 ? spent / tripDays : 0);
+  const allowDay = dailyBudgetAllowance ?? (tripDays > 0 ? totalBudget / tripDays : 0);
 
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl border border-neutral-100 overflow-hidden",
-        "shadow-sm",
+        "bg-white/95 backdrop-blur-xl rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden",
         className
       )}
     >
       {/* Header */}
       <div className="p-6 pb-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Wallet className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <Wallet className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-display font-bold text-neutral-900 text-lg">Financial Overview</h3>
+              <p className="text-xs text-neutral-500">Real-time trip expenditure & allowances</p>
+            </div>
           </div>
-          <h3 className="font-semibold text-neutral-900">Budget Summary</h3>
-          {isOver && (
-            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-error bg-red-50 px-2 py-1 rounded-full">
-              <AlertTriangle className="h-3 w-3" />
-              Over budget
+
+          {isOver ? (
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-3 py-1 rounded-full">
+              <AlertTriangle className="h-3.5 w-3.5 text-red-600" />
+              Over Budget by {currency}{Math.abs(remaining).toLocaleString()}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+              On Track · {currency}{remaining.toLocaleString()} left
             </span>
           )}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="bg-neutral-50 rounded-xl p-3 text-center">
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">Budget</p>
-            <p className="text-base font-bold text-neutral-900">{currency}{totalBudget.toLocaleString()}</p>
-          </div>
-          <div className="bg-neutral-50 rounded-xl p-3 text-center">
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">Spent</p>
-            <p className="text-base font-bold text-neutral-900">{currency}{spent.toLocaleString()}</p>
-          </div>
-          <div className={cn("rounded-xl p-3 text-center", isOver ? "bg-red-50" : "bg-emerald-50")}>
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 mb-1">
-              {isOver ? "Over" : "Left"}
+        {/* 4 Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <div className="bg-neutral-50/80 border border-neutral-100 rounded-2xl p-3.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Total Budget</span>
+            <p className="text-lg font-display font-bold text-neutral-900 mt-0.5">
+              {currency}{totalBudget.toLocaleString()}
             </p>
-            <p className={cn("text-base font-bold", isOver ? "text-error" : "text-emerald-600")}>
+          </div>
+          <div className="bg-neutral-50/80 border border-neutral-100 rounded-2xl p-3.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Total Spent</span>
+            <p className="text-lg font-display font-bold text-neutral-900 mt-0.5">
+              {currency}{spent.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-neutral-50/80 border border-neutral-100 rounded-2xl p-3.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Daily Allowance</span>
+            <p className="text-lg font-display font-bold text-neutral-800 mt-0.5">
+              {currency}{Math.round(allowDay).toLocaleString()}
+              <span className="text-xs font-normal text-neutral-400">/day</span>
+            </p>
+          </div>
+          <div className={cn("border rounded-2xl p-3.5", isOver ? "bg-red-50/60 border-red-100" : "bg-emerald-50/60 border-emerald-100")}>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+              {isOver ? "Over Budget" : "Remaining"}
+            </span>
+            <p className={cn("text-lg font-display font-bold mt-0.5", isOver ? "text-red-700" : "text-emerald-700")}>
               {currency}{Math.abs(remaining).toLocaleString()}
             </p>
           </div>
         </div>
 
-        <BudgetProgressBar spent={spent} total={totalBudget} currency={currency} />
+        <BudgetProgressBar spent={spent} total={totalBudget} currency={currency} size="md" />
       </div>
 
       {/* Category breakdown */}
-      <div className="border-t border-neutral-100 p-6 pt-4">
-        <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">
-          By Category
-        </h4>
-        <div className="space-y-2.5">
-          {categories.map(({ category, amount }) => {
-            const config = expenseCategoryConfig[category];
-            const pct = spent > 0 ? Math.round((amount / spent) * 100) : 0;
-            return (
-              <div key={category} className="flex items-center gap-3">
-                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", config.bgColor, config.color)}>
-                  {config.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-neutral-700">{config.label}</span>
-                    <span className="text-xs font-semibold text-neutral-900">
-                      {currency}{amount.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-full rounded-full", config.bgColor.replace("50", "300"))}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-                <span className="text-[10px] text-neutral-400 w-8 text-right">{pct}%</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═════════════════════════════════════════
-   CATEGORY BREAKDOWN (simple)
-   ═════════════════════════════════════════ */
-
-export function CategoryBreakdown({
-  categories,
-  total,
-  currency = "₹",
-  className,
-}: {
-  categories: { category: ExpenseCategory; amount: number }[];
-  total: number;
-  currency?: string;
-  className?: string;
-}) {
-  return (
-    <div className={cn("space-y-3", className)}>
-      {categories.map(({ category, amount }) => {
-        const config = expenseCategoryConfig[category];
-        const pct = total > 0 ? Math.round((amount / total) * 100) : 0;
-        return (
-          <div key={category} className="flex items-center gap-3">
-            <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", config.bgColor, config.color)}>
-              {config.icon}
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-medium text-neutral-700">{config.label}</span>
-                <span className="font-semibold text-neutral-900">{currency}{amount.toLocaleString()}</span>
-              </div>
-              <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary/60 transition-all duration-500"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </div>
+      {categories.length > 0 && (
+        <div className="border-t border-neutral-100 p-6 pt-5 bg-neutral-50/40">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
+              Category Distribution
+            </h4>
+            <span className="text-xs text-neutral-400 font-medium">
+              {categories.length} categories logged
+            </span>
           </div>
-        );
-      })}
+
+          <CategoryDistributionBar categories={categories} totalSpent={spent} />
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-4">
+            {categories.map(({ category, amount }) => {
+              const catKey = (category.toLowerCase() as ExpenseCategory) in expenseCategoryConfig
+                ? (category.toLowerCase() as ExpenseCategory)
+                : "other";
+              const config = expenseCategoryConfig[catKey];
+              const pct = spent > 0 ? Math.round((amount / spent) * 100) : 0;
+
+              return (
+                <div
+                  key={category}
+                  className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-neutral-200/70 shadow-2xs"
+                >
+                  <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center shrink-0 border", config.bgColor, config.color, config.borderColor)}>
+                    {config.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-neutral-800 truncate">{config.label}</p>
+                    <p className="text-[11px] font-bold text-neutral-900">
+                      {currency}{amount.toLocaleString()} <span className="text-[10px] text-neutral-400 font-normal">({pct}%)</span>
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

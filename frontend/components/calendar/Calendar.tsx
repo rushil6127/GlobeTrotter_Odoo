@@ -2,7 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Clock, DollarSign } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Calendar as CalendarIcon } from "lucide-react";
 
 /* ═════════════════════════════════════════
    CALENDAR HEADER
@@ -35,33 +35,36 @@ export function CalendarHeader({
       )}
     >
       <div className="flex items-center gap-3">
-        <h2 className="text-xl sm:text-2xl font-display font-bold text-neutral-900">
-          {month} {year}
+        <h2 className="text-2xl sm:text-3xl font-display font-extrabold text-neutral-900 tracking-tight">
+          {month} <span className="text-primary font-normal">{year}</span>
         </h2>
         {onToday && (
           <button
+            type="button"
             onClick={onToday}
-            className="px-3 py-1 rounded-xl text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-colors shadow-xs"
+            className="px-3 py-1 rounded-xl text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-all shadow-2xs"
           >
             Today
           </button>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         {children}
-        <div className="flex items-center gap-1 bg-white border border-neutral-200/80 rounded-xl p-0.5 shadow-sm">
+        <div className="flex items-center gap-1 bg-white border border-neutral-200/80 rounded-2xl p-1 shadow-xs">
           <button
+            type="button"
             onClick={onPrev}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+            className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
             title="Previous Month"
             aria-label="Previous Month"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
+            type="button"
             onClick={onNext}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+            className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
             title="Next Month"
             aria-label="Next Month"
           >
@@ -89,14 +92,14 @@ export interface CalendarEventData {
 }
 
 const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
-  Sightseeing: { bg: "bg-sky-50", text: "text-sky-700", border: "border-sky-200" },
-  Food: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
-  Adventure: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200" },
-  "Water Sports": { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
-  Culture: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
-  Shopping: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
-  Nightlife: { bg: "bg-indigo-50", text: "text-indigo-700", border: "border-indigo-200" },
-  Relaxation: { bg: "bg-teal-50", text: "text-teal-700", border: "border-teal-200" },
+  Sightseeing: { bg: "bg-sky-50", text: "text-sky-800", border: "border-sky-200" },
+  Food: { bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200" },
+  Adventure: { bg: "bg-orange-50", text: "text-orange-800", border: "border-orange-200" },
+  "Water Sports": { bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
+  Culture: { bg: "bg-purple-50", text: "text-purple-800", border: "border-purple-200" },
+  Shopping: { bg: "bg-pink-50", text: "text-pink-800", border: "border-pink-200" },
+  Nightlife: { bg: "bg-indigo-50", text: "text-indigo-800", border: "border-indigo-200" },
+  Relaxation: { bg: "bg-teal-50", text: "text-teal-800", border: "border-teal-200" },
 };
 
 export function CalendarEventPill({
@@ -109,14 +112,14 @@ export function CalendarEventPill({
   const cat = event.category ?? "Sightseeing";
   const colors = categoryColors[cat] || {
     bg: "bg-primary/10",
-    text: "text-primary-800",
+    text: "text-primary-900",
     border: "border-primary/20",
   };
 
   return (
     <div
       className={cn(
-        "px-2 py-1 rounded-lg text-[11px] font-semibold border truncate flex items-center justify-between gap-1 shadow-2xs transition-all hover:scale-[1.02]",
+        "px-2 py-1 rounded-lg text-[11px] font-semibold border truncate flex items-center justify-between gap-1 shadow-2xs transition-all hover:brightness-95",
         colors.bg,
         colors.text,
         colors.border,
@@ -126,7 +129,7 @@ export function CalendarEventPill({
     >
       <span className="truncate">{event.title}</span>
       {event.startTime && (
-        <span className="shrink-0 text-[10px] opacity-75 font-mono">
+        <span className="shrink-0 text-[10px] opacity-80 font-mono font-bold">
           {event.startTime}
         </span>
       )}
@@ -155,7 +158,6 @@ export interface CalendarDayCellProps {
 }
 
 export function CalendarDayCell({
-  date,
   dateStr,
   dayNumber,
   isToday,
@@ -173,22 +175,22 @@ export function CalendarDayCell({
     <div
       onClick={onClick}
       className={cn(
-        "min-h-[105px] sm:min-h-[120px] p-2 border border-neutral-100/90 cursor-pointer transition-all duration-150 relative flex flex-col justify-between group",
-        isCurrentMonth ? "bg-white" : "bg-neutral-50/50 text-neutral-300",
+        "min-h-[110px] sm:min-h-[125px] p-2.5 border border-neutral-100/80 cursor-pointer transition-all duration-150 relative flex flex-col justify-between group",
+        isCurrentMonth ? "bg-white" : "bg-neutral-50/40 text-neutral-300",
         isTripDay && isCurrentMonth && "bg-primary/5",
-        isToday && "bg-amber-50/30",
+        isToday && "bg-amber-50/40",
         isSelected && "ring-2 ring-primary ring-inset z-10 bg-primary/10",
         !isSelected && "hover:bg-neutral-50/90",
         className
       )}
     >
-      {/* Top Header of Day: Day number & Trip Badge */}
+      {/* Header of Day */}
       <div className="flex items-center justify-between gap-1 mb-1">
         <span
           className={cn(
             "text-xs font-bold h-6 w-6 rounded-full flex items-center justify-center transition-colors",
             isToday
-              ? "bg-primary text-white shadow-sm"
+              ? "bg-amber-500 text-white font-extrabold shadow-xs"
               : isSelected
               ? "bg-neutral-900 text-white"
               : isCurrentMonth
@@ -202,18 +204,18 @@ export function CalendarDayCell({
         {isTripDay && tripDayNumber != null && (
           <span
             className={cn(
-              "px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-tight uppercase shrink-0",
+              "px-1.5 py-0.5 rounded-md text-[9px] font-extrabold tracking-tight uppercase shrink-0",
               isTripStart || isTripEnd
                 ? "bg-primary text-white shadow-2xs"
                 : "bg-primary/15 text-primary"
             )}
           >
-            Day {tripDayNumber}
+            {isTripStart ? "Day 1 · Start" : isTripEnd ? `Day ${tripDayNumber} · End` : `Day ${tripDayNumber}`}
           </span>
         )}
       </div>
 
-      {/* Events List inside Day */}
+      {/* Events inside Day */}
       <div className="space-y-1 flex-1 overflow-hidden">
         {events.slice(0, 3).map((event) => (
           <CalendarEventPill key={event.id} event={event} />
@@ -225,11 +227,11 @@ export function CalendarDayCell({
         )}
       </div>
 
-      {/* Subtle indicator bar for trip dates */}
+      {/* Trip Duration Bottom Accent */}
       {isTripDay && (
         <div
           className={cn(
-            "h-1 rounded-full mt-1",
+            "h-1 rounded-full mt-1.5",
             isTripStart || isTripEnd ? "bg-primary" : "bg-primary/30"
           )}
         />
