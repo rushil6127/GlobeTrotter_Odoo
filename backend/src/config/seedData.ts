@@ -654,4 +654,71 @@ export const SEED_CITIES: SeedCity[] = [
       }
     ],
   },
+  {
+    id: "c1000000-0000-0000-0000-000000000021",
+    name: "London",
+    country: "United Kingdom",
+    description: "The historic capital of England, renowned for Big Ben, Tower Bridge, Buckingham Palace, world-class West End theatre, and rich museum culture.",
+    image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80",
+    latitude: 51.5074,
+    longitude: -0.1278,
+    activities: [
+      {
+        id: "a1000000-0000-0000-0000-000000000047",
+        name: "Tower of London & Crown Jewels Tour",
+        description: "Explore nearly a millennium of royal history, meet the Yeoman Warders, and marvel at the sparkling Crown Jewels.",
+        category: "Culture",
+        duration: 180,
+        estimatedCost: 34,
+        image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        id: "a1000000-0000-0000-0000-000000000048",
+        name: "London Eye Panoramic Flight",
+        description: "Enjoy breathtaking 360-degree views across London from Europe's tallest cantilevered observation wheel.",
+        category: "Sightseeing",
+        duration: 45,
+        estimatedCost: 28,
+        image: "https://images.unsplash.com/photo-1529655683826-aba9b3e77383?auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        id: "a1000000-0000-0000-0000-000000000049",
+        name: "Westminster Abbey & Houses of Parliament Walk",
+        description: "Discover royal coronations, historic graves of poets and monarchs, and hear Big Ben chime over the Thames.",
+        category: "Sightseeing",
+        duration: 120,
+        estimatedCost: 25,
+        image: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=800&q=80",
+      }
+    ],
+  },
+  {
+    id: "c1000000-0000-0000-0000-000000000022",
+    name: "Dubai",
+    country: "United Arab Emirates",
+    description: "An ultra-modern oasis known for luxury shopping, futuristic architecture, the iconic Burj Khalifa, and desert safaris.",
+    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80",
+    latitude: 25.2048,
+    longitude: 55.2708,
+    activities: [
+      {
+        id: "a1000000-0000-0000-0000-000000000050",
+        name: "Burj Khalifa At The Top Observation Deck",
+        description: "Ascend to levels 124 and 125 of the world's tallest building for unprecedented desert and ocean views.",
+        category: "Sightseeing",
+        duration: 90,
+        estimatedCost: 45,
+        image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        id: "a1000000-0000-0000-0000-000000000051",
+        name: "Desert Safari, Dune Bashing & BBQ Dinner",
+        description: "Experience 4x4 dune bashing, camel riding, sandboarding, and traditional Tanoura dance under the stars.",
+        category: "Adventure",
+        duration: 360,
+        estimatedCost: 65,
+        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+      }
+    ],
+  },
 ];

@@ -81,16 +81,20 @@ function CitySearchPanel({
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
   const [addError, setAddError] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const doSearch = useCallback(async (q: string) => {
-    if (!q.trim()) {
+    const trimmed = q.trim();
+    if (!trimmed) {
       setResults([]);
+      setIsOpen(false);
       return;
     }
     setSearching(true);
+    setIsOpen(true);
     try {
-      const cities = await searchCities(q);
-      setResults(cities);
+      const cities = await searchCities(trimmed);
+      setResults(cities || []);
     } catch {
       setResults([]);
     } finally {
@@ -105,6 +109,7 @@ function CitySearchPanel({
       await addCityToTrip(tripId, { cityId: city.id });
       setResults([]);
       setQuery("");
+      setIsOpen(false);
       onAdded();
     } catch (err) {
       setAddError(err instanceof ApiError ? err.message : "Could not add city.");
@@ -114,53 +119,96 @@ function CitySearchPanel({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-          <input
-            type="text"
-            placeholder="Search cities to add destination stop (e.g. Paris, Tokyo, Goa)…"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              doSearch(e.target.value);
+    <div className="relative space-y-2">
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 pointer-events-none" />
+        <input
+          type="text"
+          placeholder="Search cities to add destination stop (e.g. London, Paris, Tokyo, Dubai)…"
+          value={query}
+          onFocus={() => {
+            if (query.trim()) setIsOpen(true);
+          }}
+          onChange={(e) => {
+            const val = e.target.value;
+            setQuery(val);
+            doSearch(val);
+          }}
+          className="w-full h-11 pl-10 pr-10 rounded-2xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white shadow-sm transition-all"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setResults([]);
+              setIsOpen(false);
             }}
-            className="w-full h-11 pl-10 pr-4 rounded-2xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white shadow-sm"
-          />
-        </div>
-      </div>
-      {addError && <p className="text-xs text-red-600 font-medium px-1">{addError}</p>}
-      {(searching || results.length > 0) && (
-        <div className="rounded-2xl border border-neutral-200/80 bg-white/95 backdrop-blur-md shadow-xl divide-y divide-neutral-100 max-h-64 overflow-y-auto z-20">
-          {searching && <p className="text-sm text-neutral-400 p-4">Searching destinations…</p>}
-          {results.map((city) => {
-            const already = existingCityIds.includes(city.id);
-            return (
-              <div key={city.id} className="flex items-center justify-between px-4 py-3 hover:bg-neutral-50/80 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                    <MapPin className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-neutral-900">{city.name}</p>
-                    <p className="text-xs text-neutral-500 font-medium">{city.country}</p>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant={already ? "ghost" : "primary"}
-                  disabled={already || adding === city.id}
-                  loading={adding === city.id}
-                  onClick={() => handleAdd(city)}
-                >
-                  {already ? "Added" : "Add Stop"}
-                </Button>
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 p-1 rounded-full"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+
+        {/* Floating Dropdown Popup */}
+        {isOpen && query.trim() && (
+          <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-neutral-200/90 bg-white/98 backdrop-blur-xl shadow-2xl divide-y divide-neutral-100 max-h-72 overflow-y-auto z-40 animate-in fade-in slide-in-from-top-1 duration-150">
+            {searching ? (
+              <div className="flex items-center gap-2 p-4 text-sm text-neutral-500">
+                <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                <span>Searching destinations for &ldquo;{query}&rdquo;...</span>
               </div>
-            );
-          })}
-        </div>
-      )}
+            ) : results.length > 0 ? (
+              results.map((city) => {
+                const already = existingCityIds.includes(city.id);
+                return (
+                  <div
+                    key={city.id}
+                    className="flex items-center justify-between px-4 py-3 hover:bg-neutral-50/90 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {city.image ? (
+                        <img
+                          src={city.image}
+                          alt={city.name}
+                          className="h-10 w-10 rounded-xl object-cover shrink-0 border border-neutral-100"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                          <MapPin className="h-4 w-4" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-neutral-900 truncate">{city.name}</p>
+                        <p className="text-xs text-neutral-500 font-medium truncate">{city.country}</p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant={already ? "ghost" : "primary"}
+                      disabled={already || adding === city.id}
+                      loading={adding === city.id}
+                      onClick={() => handleAdd(city)}
+                      className="shrink-0 ml-2"
+                    >
+                      {already ? "Added" : "Add Stop"}
+                    </Button>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-4 text-center text-sm text-neutral-500">
+                <p className="font-medium text-neutral-700">No destinations found</p>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Try searching for London, Paris, Tokyo, Dubai, Rome, Amsterdam, etc.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {addError && <p className="text-xs text-red-600 font-medium px-1">{addError}</p>}
     </div>
   );
 }

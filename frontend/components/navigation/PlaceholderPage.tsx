@@ -6,6 +6,8 @@ import { Navbar, MobileNav } from "@/components/navigation/Navbar";
 import { Sidebar } from "@/components/navigation/Sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { FullPageLoader } from "@/components/ui/Loader";
+import { Button } from "@/components/ui/Button";
+import { Globe, LogIn, UserPlus } from "lucide-react";
 
 /* ───────── Types ───────── */
 
@@ -31,7 +33,8 @@ export function PageShell({
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.replace(`/login?redirectTo=${encodeURIComponent(currentPath)}`);
+      const target = `/login?redirectTo=${encodeURIComponent(currentPath)}`;
+      router.replace(target);
     }
   }, [isLoading, user, router, currentPath]);
 
@@ -44,9 +47,44 @@ export function PageShell({
   }
 
   if (!user) {
+    const loginUrl = `/login?redirectTo=${encodeURIComponent(currentPath)}`;
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-        <FullPageLoader message="Redirecting to sign in..." />
+      <div className="min-h-screen flex items-center justify-center bg-neutral-900/40 backdrop-blur-sm px-4">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl border border-white/60 shadow-2xl p-8 max-w-md w-full text-center space-y-5">
+          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center mx-auto shadow-md shadow-primary/25 text-white">
+            <Globe className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-display font-bold text-neutral-900">Sign in required</h2>
+            <p className="text-sm text-neutral-500 mt-1">
+              Please sign in or create an account to view your GlobeTrotter dashboard and trips.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2.5 pt-2">
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              leftIcon={<LogIn className="h-4 w-4" />}
+              onClick={() => {
+                window.location.href = loginUrl;
+              }}
+            >
+              Sign In to GlobeTrotter
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              fullWidth
+              leftIcon={<UserPlus className="h-4 w-4" />}
+              onClick={() => {
+                window.location.href = "/register";
+              }}
+            >
+              Create New Account
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

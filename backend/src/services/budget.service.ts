@@ -354,7 +354,7 @@ export class BudgetService {
           cheaperActivities = await prisma.activity.findMany({
             where: {
               cityId: targetCityId,
-              category: { equals: targetCategory, mode: 'insensitive' },
+              category: { equals: targetCategory },
               estimatedCost: { lt: currentCost },
               id: { notIn: scheduledActivityIds },
             },

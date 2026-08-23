@@ -4,11 +4,13 @@ dist/
 build/
 .next/
 
-# Environment
+# Environment & Local DB
 .env
 .env.local
 .env.production
 *.env
+*.db
+*.db-journal
 
 # Logs
 npm-debug.log*

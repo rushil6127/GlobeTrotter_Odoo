@@ -216,8 +216,8 @@ Important Rules:
         const cityFromDb = await prisma.city.findFirst({
           where: {
             OR: [
-              { name: { contains: destination, mode: 'insensitive' } },
-              { country: { contains: destination, mode: 'insensitive' } },
+              { name: { contains: destination } },
+              { country: { contains: destination } },
             ],
           },
           include: {

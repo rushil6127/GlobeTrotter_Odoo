@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 import { SEED_CITIES } from '../src/config/seedData.js';
 
 const prisma = new PrismaClient();
@@ -65,7 +66,93 @@ async function main() {
     }
   }
 
-  console.log(`✅ Seeding complete! Successfully seeded ${citiesSeeded} cities and ${activitiesSeeded} activities.`);
+  // Seed Demo User
+  console.log('👤 Seeding demo user...');
+  const hashedPassword = await bcrypt.hash('password123', 10);
+  const demoUser = await prisma.user.upsert({
+    where: { email: 'demo@example.com' },
+    update: {
+      name: 'Pushp (Traveler)',
+      password: hashedPassword,
+    },
+    create: {
+      id: 'demo-user-id',
+      email: 'demo@example.com',
+      name: 'Pushp (Traveler)',
+      password: hashedPassword,
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&fit=crop&q=80',
+    },
+  });
+
+  // Seed Sample Trips
+  console.log('✈️ Seeding sample trips...');
+  const now = new Date();
+  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const twoWeeksLater = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+
+  const goaTrip = await prisma.trip.upsert({
+    where: { id: 'demo-trip-goa-01' },
+    update: {},
+    create: {
+      id: 'demo-trip-goa-01',
+      name: 'Goa Coastal Getaway',
+      description: 'Sun, sand, historical churches and coastal seafood adventures across North and South Goa.',
+      startDate: nextWeek,
+      endDate: twoWeeksLater,
+      budget: 45000,
+      currency: 'INR',
+      userId: demoUser.id,
+      tripCities: {
+        create: [
+          {
+            cityId: 'c1000000-0000-0000-0000-000000000001',
+            order: 0,
+          },
+        ],
+      },
+      expenses: {
+        create: [
+          {
+            category: 'accommodation',
+            amount: 18000,
+            date: nextWeek,
+            description: 'Beach Resort Booking',
+          },
+          {
+            category: 'food',
+            amount: 8500,
+            date: nextWeek,
+            description: 'Seafood and cafe dining',
+          },
+        ],
+      },
+    },
+  });
+
+  const tokyoTrip = await prisma.trip.upsert({
+    where: { id: 'demo-trip-tokyo-02' },
+    update: {},
+    create: {
+      id: 'demo-trip-tokyo-02',
+      name: 'Tokyo Neon & Temples',
+      description: 'Exploring modern Shinjuku skyscrapers, historic Asakusa, and culinary marvels in Tsukiji.',
+      startDate: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+      endDate: new Date(now.getTime() + 37 * 24 * 60 * 60 * 1000),
+      budget: 120000,
+      currency: 'INR',
+      userId: demoUser.id,
+      tripCities: {
+        create: [
+          {
+            cityId: 'c1000000-0000-0000-0000-000000000003',
+            order: 0,
+          },
+        ],
+      },
+    },
+  });
+
+  console.log(`✅ Seeding complete! Successfully seeded ${citiesSeeded} cities, ${activitiesSeeded} activities, demo user (demo@example.com), and demo trips.`);
 }
 
 main()
