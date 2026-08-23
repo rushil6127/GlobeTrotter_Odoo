@@ -27,6 +27,8 @@ import {
 } from "@/lib/api/trips";
 import { searchCities, type City } from "@/lib/api/cities";
 import { ShareTripModal } from "@/components/trips/ShareTripModal";
+import { AiPlannerModal } from "@/components/ai/AiPlannerModal";
+import { MembersModal } from "@/components/collaboration/MembersModal";
 import {
   CalendarDays,
   MapPin,
@@ -431,6 +433,8 @@ export default function TripDetailPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
@@ -458,15 +462,13 @@ export default function TripDetailPage() {
 
   return (
     <PageShell currentPath="/trips" userName={user?.name ?? undefined}>
-      <div className="max-w-6xl mx-auto space-y-8 pb-32 pt-2 md:pt-4">
-        {/* Loading Skeleton */}
+      <div className="max-w-5xl mx-auto space-y-8 pb-32 pt-2 md:pt-4">
+        {/* Loading Skeletons */}
         {isLoading && (
           <div className="space-y-6">
-            <Skeleton variant="rounded" height={260} />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Skeleton variant="rounded" height={300} className="lg:col-span-2" />
-              <Skeleton variant="rounded" height={300} />
-            </div>
+            <Skeleton variant="rounded" height={300} />
+            <Skeleton variant="rounded" height={80} />
+            <Skeleton variant="rounded" height={200} />
           </div>
         )}
 
@@ -503,11 +505,29 @@ export default function TripDetailPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/40 to-transparent" />
 
                 {/* Top Action Bar */}
-                <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                <div className="absolute top-4 left-4 right-4 flex items-center justify-between flex-wrap gap-2">
                   <Badge variant="primary" size="sm" dot>
                     {duration} Days Adventure
                   </Badge>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      leftIcon={<Sparkles className="h-3.5 w-3.5 text-amber-500" />}
+                      onClick={() => setAiModalOpen(true)}
+                      className="bg-white/95 backdrop-blur-md shadow-sm font-bold text-neutral-900"
+                    >
+                      AI Planner
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      leftIcon={<Users className="h-3.5 w-3.5 text-primary" />}
+                      onClick={() => setMembersOpen(true)}
+                      className="bg-white/95 backdrop-blur-md shadow-sm font-bold text-neutral-900"
+                    >
+                      Collaborators
+                    </Button>
                     <Button
                       size="sm"
                       variant="secondary"
@@ -727,6 +747,30 @@ export default function TripDetailPage() {
         <ShareTripModal
           open={shareOpen}
           onClose={() => setShareOpen(false)}
+          tripId={trip.id}
+          tripName={trip.name}
+        />
+      )}
+
+      {/* AI Planner Modal */}
+      {trip && (
+        <AiPlannerModal
+          open={aiModalOpen}
+          onClose={() => setAiModalOpen(false)}
+          tripId={trip.id}
+          tripName={trip.name}
+          defaultDestination={trip.name.split(" ")[0] || "Goa"}
+          defaultDays={duration}
+          defaultBudget={trip.budget || 50000}
+          onItinerarySaved={refetch}
+        />
+      )}
+
+      {/* Members & Collaborators Modal */}
+      {trip && (
+        <MembersModal
+          open={membersOpen}
+          onClose={() => setMembersOpen(false)}
           tripId={trip.id}
           tripName={trip.name}
         />

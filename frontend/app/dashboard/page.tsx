@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { PageShell } from "@/components/navigation/PlaceholderPage";
@@ -13,6 +13,7 @@ import { Skeleton, CardSkeleton } from "@/components/ui/Loader";
 import { useAuth } from "@/context/AuthContext";
 import { useApiData } from "@/lib/hooks/useApiData";
 import { getTrips, type Trip } from "@/lib/api/trips";
+import { AiPlannerModal } from "@/components/ai/AiPlannerModal";
 import {
   Plus,
   Compass,
@@ -497,6 +498,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { data: trips, isLoading, error, refetch } = useApiData<Trip[]>(() => getTrips());
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   // Dynamic greetings
   const timeGreeting = getTimeGreeting();
@@ -559,6 +561,15 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2.5 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    leftIcon={<Sparkles className="h-4 w-4 text-amber-500" />}
+                    onClick={() => setAiModalOpen(true)}
+                    className="bg-gradient-to-r from-amber-50 to-orange-50/70 border-amber-200/90 text-amber-900 shadow-xs font-bold"
+                  >
+                    Plan with AI
+                  </Button>
                   <Button
                     variant="primary"
                     size="lg"
@@ -625,6 +636,13 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* AI Planner Modal */}
+      <AiPlannerModal
+        open={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        onItinerarySaved={refetch}
+      />
     </PageShell>
   );
 }

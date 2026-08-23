@@ -12,7 +12,8 @@ import { ConfirmModal } from "@/components/ui/Modal";
 import { useApiData } from "@/lib/hooks/useApiData";
 import { useAuth } from "@/context/AuthContext";
 import { getTrips, deleteTrip, type Trip } from "@/lib/api/trips";
-import { Plus, RefreshCw, AlertCircle, Search, SortAsc } from "lucide-react";
+import { AiPlannerModal } from "@/components/ai/AiPlannerModal";
+import { Plus, RefreshCw, AlertCircle, Search, SortAsc, Sparkles } from "lucide-react";
 import { ApiError } from "@/lib/api/client";
 
 /* ── helpers ── */
@@ -56,6 +57,7 @@ export default function TripsPage() {
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [aiPlannerOpen, setAiPlannerOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Trip | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -104,15 +106,26 @@ export default function TripsPage() {
               {trips ? `Organize and manage your ${trips.length} travel plans` : "Loading your trips…"}
             </p>
           </div>
-          <Button
-            variant="primary"
-            size="lg"
-            leftIcon={<Plus className="h-5 w-5" />}
-            onClick={() => router.push("/trips/new")}
-            className="shadow-md shadow-primary/20 hover:shadow-lg transition-all shrink-0"
-          >
-            Plan a New Trip
-          </Button>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Button
+              variant="outline"
+              size="lg"
+              leftIcon={<Sparkles className="h-4 w-4 text-amber-500" />}
+              onClick={() => setAiPlannerOpen(true)}
+              className="bg-gradient-to-r from-amber-50 to-orange-50/70 border-amber-200/90 text-amber-900 shadow-xs font-bold shrink-0"
+            >
+              Plan with AI
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              leftIcon={<Plus className="h-5 w-5" />}
+              onClick={() => router.push("/trips/new")}
+              className="shadow-md shadow-primary/20 hover:shadow-lg transition-all shrink-0"
+            >
+              Plan a New Trip
+            </Button>
+          </div>
         </div>
 
         {/* Filter & Search Bar */}
@@ -275,6 +288,13 @@ export default function TripsPage() {
           }}
         />
       )}
+
+      {/* AI Planner Modal */}
+      <AiPlannerModal
+        open={aiPlannerOpen}
+        onClose={() => setAiPlannerOpen(false)}
+        onItinerarySaved={refetch}
+      />
     </PageShell>
   );
 }
