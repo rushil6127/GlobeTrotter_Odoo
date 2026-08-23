@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { voteActivity, removeVote, type VoteStats } from "@/lib/api/collaboration";
 import { ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
-import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Heart } from "lucide-react";
 
 export interface VoteButtonProps {
   tripId: string;
@@ -53,7 +53,14 @@ export function VoteButton({
     } else {
       // Adding or changing vote
       setUserVote(targetVote);
-      const scoreDelta = targetVote === "UPVOTE" ? (prevVote === "DOWNVOTE" ? 2 : 1) : prevVote === "UPVOTE" ? -2 : -1;
+      const scoreDelta =
+        targetVote === "UPVOTE"
+          ? prevVote === "DOWNVOTE"
+            ? 2
+            : 1
+          : prevVote === "UPVOTE"
+          ? -2
+          : -1;
       setScore((s) => s + scoreDelta);
       try {
         const res = await voteActivity(tripId, activityId, targetVote);
@@ -74,50 +81,59 @@ export function VoteButton({
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-xl bg-neutral-100/80 border border-neutral-200/80 p-0.5 shadow-2xs",
+        "inline-flex items-center rounded-2xl bg-white border border-neutral-200/90 p-0.5 shadow-2xs transition-all hover:border-neutral-300",
+        userVote === "UPVOTE" && "ring-1 ring-emerald-500/30 bg-emerald-50/40 border-emerald-200",
+        userVote === "DOWNVOTE" && "ring-1 ring-rose-500/30 bg-rose-50/40 border-rose-200",
         className
       )}
     >
+      {/* Upvote Reaction Button */}
       <button
         type="button"
         disabled={loading}
         onClick={() => handleVote("UPVOTE")}
         className={cn(
-          "flex items-center justify-center rounded-lg transition-colors",
-          isSmall ? "h-6 w-6" : "h-7 w-7",
+          "flex items-center justify-center rounded-xl transition-all active:scale-90",
+          isSmall ? "h-6 px-1.5 gap-1 text-[11px]" : "h-7 px-2 gap-1.5 text-xs font-bold",
           userVote === "UPVOTE"
-            ? "bg-emerald-500 text-white shadow-2xs"
+            ? "bg-emerald-500 text-white font-extrabold shadow-xs"
             : "text-neutral-500 hover:text-emerald-700 hover:bg-emerald-50"
         )}
-        title="Upvote activity"
+        title="Upvote activity (I want to do this!)"
       >
-        <ThumbsUp className={cn(isSmall ? "h-3 w-3" : "h-3.5 w-3.5")} />
+        <ThumbsUp className={cn(isSmall ? "h-3 w-3" : "h-3.5 w-3.5", userVote === "UPVOTE" && "fill-current")} />
       </button>
 
+      {/* Net Score Reaction Tally */}
       <span
         className={cn(
-          "font-mono font-bold px-1.5 text-center min-w-[20px]",
+          "font-mono font-extrabold px-1.5 text-center min-w-[20px] select-none",
           isSmall ? "text-[11px]" : "text-xs",
-          score > 0 ? "text-emerald-700" : score < 0 ? "text-red-600" : "text-neutral-600"
+          score > 0
+            ? "text-emerald-700"
+            : score < 0
+            ? "text-rose-600"
+            : "text-neutral-500"
         )}
       >
         {score > 0 ? `+${score}` : score}
       </span>
 
+      {/* Downvote Reaction Button */}
       <button
         type="button"
         disabled={loading}
         onClick={() => handleVote("DOWNVOTE")}
         className={cn(
-          "flex items-center justify-center rounded-lg transition-colors",
-          isSmall ? "h-6 w-6" : "h-7 w-7",
+          "flex items-center justify-center rounded-xl transition-all active:scale-90",
+          isSmall ? "h-6 px-1.5 text-[11px]" : "h-7 px-2 text-xs font-bold",
           userVote === "DOWNVOTE"
-            ? "bg-red-500 text-white shadow-2xs"
-            : "text-neutral-500 hover:text-red-700 hover:bg-red-50"
+            ? "bg-rose-500 text-white font-extrabold shadow-xs"
+            : "text-neutral-500 hover:text-rose-700 hover:bg-rose-50"
         )}
-        title="Downvote activity"
+        title="Downvote activity (Prefer to skip)"
       >
-        <ThumbsDown className={cn(isSmall ? "h-3 w-3" : "h-3.5 w-3.5")} />
+        <ThumbsDown className={cn(isSmall ? "h-3 w-3" : "h-3.5 w-3.5", userVote === "DOWNVOTE" && "fill-current")} />
       </button>
     </div>
   );

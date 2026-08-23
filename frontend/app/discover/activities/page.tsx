@@ -17,6 +17,7 @@ import { ApiError } from "@/lib/api/client";
 import { getActivities, type Activity, type ActivityListResponse, getCities, type City, type CityListResponse } from "@/lib/api/cities";
 import { getTrips, type Trip } from "@/lib/api/trips";
 import { createItineraryItem } from "@/lib/api/itinerary";
+import { SuggestActivityModal } from "@/components/collaboration/SuggestActivityModal";
 import {
   Search,
   Filter,
@@ -33,6 +34,7 @@ import {
   ArrowLeft,
   MapPin,
   Sparkles,
+  Lightbulb,
 } from "lucide-react";
 
 const CATEGORIES = ["All", "Sightseeing", "Food", "Adventure", "Water Sports", "Culture", "Shopping"];
@@ -245,9 +247,11 @@ function AddToItineraryModal({
 function DiscoverActivityCard({
   activity,
   onAdd,
+  onSuggest,
 }: {
   activity: Activity;
   onAdd: (act: Activity) => void;
+  onSuggest: (act: Activity) => void;
 }) {
   return (
     <div className="group bg-white/90 backdrop-blur-xl rounded-3xl border border-neutral-200/60 shadow-sm hover:shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
@@ -301,14 +305,23 @@ function DiscoverActivityCard({
         </div>
       </div>
 
-      <div className="p-4 sm:p-5 pt-0 border-t border-neutral-100 mt-2">
+      <div className="p-4 sm:p-5 pt-0 border-t border-neutral-100 mt-2 flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          leftIcon={<Lightbulb className="h-3.5 w-3.5 text-amber-500" />}
+          onClick={() => onSuggest(activity)}
+          className="text-xs font-bold shadow-2xs border-amber-200/90 text-amber-900 bg-amber-50/50 hover:bg-amber-100/60"
+        >
+          Suggest
+        </Button>
         <Button
           variant="primary"
           size="sm"
           fullWidth
           leftIcon={<Plus className="h-4 w-4" />}
           onClick={() => onAdd(activity)}
-          className="text-xs font-bold shadow-sm"
+          className="text-xs font-bold shadow-sm flex-1"
         >
           Add to Trip
         </Button>
@@ -329,6 +342,7 @@ function DiscoverActivitiesContent() {
   const [cityId, setCityId] = useState(initialCityId);
   const [page, setPage] = useState(1);
   const [addModalAct, setAddModalAct] = useState<Activity | null>(null);
+  const [suggestModalAct, setSuggestModalAct] = useState<Activity | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -508,6 +522,7 @@ function DiscoverActivitiesContent() {
                 key={act.id}
                 activity={act}
                 onAdd={(a) => setAddModalAct(a)}
+                onSuggest={(a) => setSuggestModalAct(a)}
               />
             ))}
           </div>
@@ -547,6 +562,16 @@ function DiscoverActivitiesContent() {
         open={Boolean(addModalAct)}
         onClose={() => setAddModalAct(null)}
       />
+
+      {/* Suggest Activity Modal */}
+      {suggestModalAct && (
+        <SuggestActivityModal
+          activityId={suggestModalAct.id}
+          activityName={suggestModalAct.name}
+          open={Boolean(suggestModalAct)}
+          onClose={() => setSuggestModalAct(null)}
+        />
+      )}
     </div>
   );
 }

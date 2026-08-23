@@ -49,6 +49,7 @@ import {
   Share2,
   Users,
   MessageSquare,
+  Lightbulb,
 } from "lucide-react";
 
 /* ── helpers ── */
@@ -63,9 +64,9 @@ function formatCost(n: number | null | undefined) {
 
 /* ── Category badge color ── */
 const categoryColors: Record<string, string> = {
-  Sightseeing: "text-sky-700 bg-sky-50 border-sky-200/60",
-  Food: "text-amber-700 bg-amber-50 border-amber-200/60",
-  Adventure: "text-orange-700 bg-orange-50 border-orange-200/60",
+  Sightseeing: "text-amber-700 bg-amber-50 border-amber-200/60",
+  Food: "text-orange-700 bg-orange-50 border-orange-200/60",
+  Adventure: "text-emerald-700 bg-emerald-50 border-emerald-200/60",
   "Water Sports": "text-blue-700 bg-blue-50 border-blue-200/60",
   Culture: "text-purple-700 bg-purple-50 border-purple-200/60",
   Shopping: "text-pink-700 bg-pink-50 border-pink-200/60",
@@ -101,9 +102,14 @@ function ItineraryItemCard({
     : "text-neutral-700 bg-neutral-100 border-neutral-200";
 
   const activityId = item.activity?.id || item.activityId;
+  const isSuggested = Boolean(
+    item.notes &&
+      (item.notes.toLowerCase().includes("suggested by") ||
+        item.notes.toLowerCase().includes("suggestion"))
+  );
 
   return (
-    <div className="flex items-start gap-3.5 group bg-white/90 backdrop-blur-sm rounded-2xl border border-neutral-200/70 p-4 sm:p-5 shadow-sm hover:shadow-md transition-all">
+    <div className="flex items-start gap-3.5 group bg-white/95 backdrop-blur-sm rounded-2xl border border-neutral-200/80 p-4 sm:p-5 shadow-sm hover:shadow-md transition-all">
       {/* Move Up/Down Controls */}
       {canEdit && (
         <div className="flex flex-col gap-1 shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -147,7 +153,7 @@ function ItineraryItemCard({
 
             <button
               onClick={() => onComment(item)}
-              className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors"
+              className="h-8 w-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors shadow-2xs border border-transparent hover:border-primary/20"
               title="Discuss / comments"
             >
               <MessageSquare className="h-4 w-4" />
@@ -194,10 +200,16 @@ function ItineraryItemCard({
               {cat}
             </span>
           )}
+          {isSuggested && (
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs">
+              <Lightbulb className="h-3.5 w-3.5 text-amber-600" />
+              Suggested by Collaborator
+            </span>
+          )}
         </div>
 
         {/* Notes */}
-        {item.notes && (
+        {item.notes && !isSuggested && (
           <p className="text-xs text-neutral-600 bg-neutral-50/80 p-2.5 rounded-xl border border-neutral-100 mt-1 leading-relaxed">
             {item.notes}
           </p>
